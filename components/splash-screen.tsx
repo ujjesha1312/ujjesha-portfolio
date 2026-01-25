@@ -104,10 +104,10 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
 
     const shootingInterval = setInterval(createShootingStar, 1200);
 
-    // Auto complete after 11 seconds
+    // Auto complete after 6 seconds
     const timer = setTimeout(() => {
       onComplete();
-    }, 11000);
+    }, 6000);
 
     return () => {
       clearInterval(shootingInterval);
