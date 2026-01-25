@@ -47,6 +47,7 @@ export default function HeroSection() {
     { id: "projects", label: "Projects" },
     { id: "experience", label: "Experience" },
     { id: "contact", label: "Contact" },
+    { id: "gallery", label: "Gallery", isExternal: true },
   ]
 
   return (
@@ -81,7 +82,7 @@ export default function HeroSection() {
               {navItems.map((item) => (
                 <Button
                   key={item.id}
-                  onClick={() => scrollToSection(item.id)}
+                  onClick={() => item.isExternal ? window.location.href = '/gallery' : scrollToSection(item.id)}
                   size="lg"
                   className="bg-white/10 text-white hover:bg-white/15 backdrop-blur-sm border border-white/10 hover:border-white/20 font-medium tracking-wide px-6 py-3 rounded-full transition-all whitespace-nowrap"
                 >
@@ -241,7 +242,7 @@ export default function HeroSection() {
                   preload="auto"
                   style={{ imageRendering: '-webkit-optimize-contrast' }}
                 >
-                  <source src="/videos/hero-montage.mp4" type="video/mp4" />
+                  <source src="/hero-montage.mp4" type="video/mp4" />
                 </video>
               </div>
 
