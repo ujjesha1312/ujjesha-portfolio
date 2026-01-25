@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UJJESHA - Full-Stack Developer | Portfolio",
-  description: "Full-stack developer crafting intelligent, scalable, and thoughtful digital systems. Specializing in modern web technologies and cloud architecture.",
+  title: "UJJESHA - Portfolio",
+  description: "Building intelligent systems and meaningful technology. Focused on AI, scalable architectures, and community-driven innovation. Let's create something impactful together.",
 };
 
 export default function RootLayout({
