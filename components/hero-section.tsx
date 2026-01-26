@@ -6,11 +6,26 @@ import { Github, Linkedin, Mail, ArrowRight, Download } from "lucide-react"
 
 export default function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
-  const [letterStates, setLetterStates] = useState<number[]>([0, 0, 0, 0, 0, 0, 0])
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [shimmerComplete, setShimmerComplete] = useState(false)
+  const [breathingPhase, setBreathingPhase] = useState(0)
+  const [hoveredLetterIndex, setHoveredLetterIndex] = useState<number | null>(null)
+  const [letterWaveStates, setLetterWaveStates] = useState<number[]>([0, 0, 0, 0, 0, 0, 0])
+  const waveTimersRef = useRef<NodeJS.Timeout[]>([])
+  const nameContainerRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
     setIsVisible(true)
+    
+    // Initial shimmer completes after letter animations
+    const shimmerTimer = setTimeout(() => {
+      setShimmerComplete(true)
+    }, 3000)
+    
+    // Breathing animation after reveal
+    const breathingInterval = setInterval(() => {
+      setBreathingPhase(prev => prev + 0.01)
+    }, 50)
     
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({
@@ -20,15 +35,63 @@ export default function HeroSection() {
     }
 
     window.addEventListener("mousemove", handleMouseMove)
-    return () => window.removeEventListener("mousemove", handleMouseMove)
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove)
+      clearTimeout(shimmerTimer)
+      clearInterval(breathingInterval)
+      waveTimersRef.current.forEach(timer => clearTimeout(timer))
+    }
   }, [])
 
-  const handleLetterHover = (index: number, isHovering: boolean) => {
-    setLetterStates(prev => {
-      const newStates = [...prev]
-      newStates[index] = isHovering ? 1 : 0
-      return newStates
+  const handleLetterHover = (index: number) => {
+    setHoveredLetterIndex(index)
+    
+    // Clear existing timers
+    waveTimersRef.current.forEach(timer => clearTimeout(timer))
+    waveTimersRef.current = []
+    
+    // Calculate wave propagation
+    const newWaveStates = [0, 0, 0, 0, 0, 0, 0]
+    
+    nameLetters.forEach((_, i) => {
+      const distance = Math.abs(i - index)
+      const delay = distance * 50 // 50ms per letter distance - slightly slower wave
+      const intensity = Math.max(0, 1 - distance * 0.3) // Fade with distance, more reach
+      
+      if (intensity > 0) {
+        const timer = setTimeout(() => {
+          setLetterWaveStates(prev => {
+            const updated = [...prev]
+            updated[i] = intensity
+            return updated
+          })
+          
+          // Settle back after peak
+          const settleTimer = setTimeout(() => {
+            setLetterWaveStates(prev => {
+              const updated = [...prev]
+              updated[i] = 0
+              return updated
+            })
+          }, 300)
+          
+          waveTimersRef.current.push(settleTimer)
+        }, delay)
+        
+        waveTimersRef.current.push(timer)
+      }
     })
+  }
+
+  const handleNameMouseLeave = () => {
+    setHoveredLetterIndex(null)
+    
+    // Clear all timers
+    waveTimersRef.current.forEach(timer => clearTimeout(timer))
+    waveTimersRef.current = []
+    
+    // Reset all letters smoothly
+    setLetterWaveStates([0, 0, 0, 0, 0, 0, 0])
   }
 
   const scrollToSection = (sectionId: string) => {
@@ -112,7 +175,7 @@ export default function HeroSection() {
               </p>
             </div>
 
-            {/* Name Section - Interactive Letter Wave Animation */}
+            {/* Name Section - Cinematic Fantasy Reveal */}
             <div
               className={
                 "relative transition-all duration-1200 delay-200 " +
@@ -127,29 +190,97 @@ export default function HeroSection() {
                 </span>
               </div>
               
-              <h1 className="flex items-center select-none" style={{ fontFamily: "'Orbitron', 'Rajdhani', 'Space Grotesk', 'SF Pro Display', system-ui, sans-serif" }}>
-                {nameLetters.map((letter, index) => (
-                  <span
-                    key={index}
-                    onMouseEnter={() => handleLetterHover(index, true)}
-                    onMouseLeave={() => handleLetterHover(index, false)}
-                    className="inline-block text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-none cursor-default"
-                    style={{
-                      color: "#FFFFFF",
-                      textShadow: "0 0 60px rgba(255, 255, 255, 0.15), 0 0 100px rgba(255, 255, 255, 0.1)",
-                      transform: `translateX(${letterStates[index] * 20}px) translateY(${Math.sin(letterStates[index] * Math.PI) * -8}px)`,
-                      transition: "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                      display: "inline-block",
-                      filter: letterStates[index] > 0 ? "brightness(1.3)" : "brightness(1)",
-                      fontWeight: 900,
-                      letterSpacing: "-0.02em",
-                    }}
-                  >
-                    {letter}
-                  </span>
-                ))}
+              {/* Light Sweep Effect */}
+              {!shimmerComplete && (
+                <div 
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                    animation: 'lightSweep 2s ease-in-out 0.8s forwards',
+                    opacity: 0,
+                  }}
+                />
+              )}
+              
+              <h1 
+                ref={nameContainerRef}
+                onMouseLeave={handleNameMouseLeave}
+                className="flex items-center select-none relative" 
+                style={{ 
+                  fontFamily: "'Orbitron', 'Rajdhani', 'Space Grotesk', 'SF Pro Display', system-ui, sans-serif",
+                }}
+              >
+                {nameLetters.map((letter, index) => {
+                  const isRevealed = isVisible;
+                  const staggerDelay = index * 0.1;
+                  const breathingScale = shimmerComplete ? 1 + Math.sin(breathingPhase + index * 0.3) * 0.008 : 1;
+                  const breathingY = shimmerComplete ? Math.sin(breathingPhase * 0.7 + index * 0.2) * 1.5 : 0;
+                  
+                  const waveIntensity = letterWaveStates[index];
+                  const waveY = -waveIntensity * 15; // 15px max movement - more visible
+                  const waveScale = 1 + (waveIntensity * 0.08); // More noticeable scale
+                  
+                  return (
+                    <span
+                      key={index}
+                      onMouseEnter={() => handleLetterHover(index)}
+                      className="inline-block text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-none cursor-pointer"
+                      style={{
+                        color: "#FFFFFF",
+                        textShadow: "0 0 60px rgba(255, 255, 255, 0.15), 0 0 100px rgba(255, 255, 255, 0.1)",
+                        transform: `
+                          translateY(${waveY + breathingY}px)
+                          scale(${waveScale * breathingScale})
+                        `,
+                        transition: "transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                        display: "inline-block",
+                        filter: "brightness(1)",
+                        fontWeight: 900,
+                        letterSpacing: "-0.02em",
+                        opacity: isRevealed ? 1 : 0,
+                        animation: isRevealed 
+                          ? `letterReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) ${staggerDelay}s both` 
+                          : 'none',
+                      }}
+                    >
+                      {letter}
+                    </span>
+                  );
+                })}
               </h1>
             </div>
+
+            <style jsx>{`
+              @keyframes letterReveal {
+                0% {
+                  opacity: 0;
+                  filter: blur(8px) brightness(0.6);
+                  transform: translateY(20px) scale(0.95);
+                }
+                60% {
+                  filter: blur(2px) brightness(1.1);
+                }
+                100% {
+                  opacity: 1;
+                  filter: blur(0px) brightness(1);
+                  transform: translateY(0px) scale(1);
+                }
+              }
+              
+              @keyframes lightSweep {
+                0% {
+                  opacity: 0;
+                  transform: translateX(-100%);
+                }
+                50% {
+                  opacity: 1;
+                }
+                100% {
+                  opacity: 0;
+                  transform: translateX(100%);
+                }
+              }
+            `}</style>
 
             {/* CTA Buttons & Social */}
             <div
