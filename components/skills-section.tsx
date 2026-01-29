@@ -21,6 +21,7 @@ import { IoLanguage } from "react-icons/io5"
 interface SkillCategory {
   id: number
   title: string
+  icon: any
   skills: { name: string; icon: any; color?: string }[]
 }
 
