@@ -185,7 +185,12 @@ export default function HeroSection() {
               }
             >
               <div className="mb-4">
-                <span className="text-2xl sm:text-3xl text-zinc-300 font-light tracking-wide">
+                <span 
+                  className="text-2xl sm:text-3xl text-zinc-300 font-light tracking-wide inline-block"
+                  style={{
+                    animation: isVisible ? 'gentleSlide 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both' : 'none',
+                  }}
+                >
                   I'm
                 </span>
               </div>

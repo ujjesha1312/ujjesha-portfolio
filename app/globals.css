@@ -160,6 +160,17 @@
   }
 }
 
+@keyframes gentleSlide {
+  0% {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.8s ease-out forwards;
   opacity: 0;
