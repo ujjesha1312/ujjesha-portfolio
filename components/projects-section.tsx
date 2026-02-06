@@ -98,6 +98,19 @@ const projects: Project[] = [
     orbitRadius: 240,
     orbitSpeed: 40,
   },
+  {
+    id: 7,
+    title: "Xpert-Chroma",
+    shortTitle: "Xpert-Chroma",
+    description:
+      "Advanced Agentic RAG system built with ChromaDB for intelligent document retrieval, contextual search, and reasoning. Demonstrates deep understanding of how vector databases, embeddings, and agents interact in production systems. Built entirely from scratch without no-code AI platforms, showcasing real systems engineering in RAG pipelines.",
+    tags: ["Python", "ChromaDB", "Vector Embeddings", "RAG Architecture", "Agentic AI", "LLMs"],
+    category: "RAG System / Vector Database",
+    githubUrl: "https://github.com/ujjesha1312/Xpert-Chroma",
+    icon: "🔮",
+    orbitRadius: 240,
+    orbitSpeed: 48,
+  },
 ]
 
 export default function ProjectsSection() {
@@ -239,8 +252,8 @@ export default function ProjectsSection() {
                   className="transition-all duration-500"
                   style={{
                     opacity: 
-                      selectedProject && [5, 6].includes(selectedProject.id) ? 0.2 :
-                      hoveredProject && [5, 6].includes(hoveredProject) ? 0.18 :
+                      selectedProject && [5, 6, 7].includes(selectedProject.id) ? 0.2 :
+                      hoveredProject && [5, 6, 7].includes(hoveredProject) ? 0.18 :
                       selectedProject ? 0.08 : 0.14
                   }}
                 />
