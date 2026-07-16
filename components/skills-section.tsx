@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Check,
@@ -39,6 +39,8 @@ export default function SkillsSection() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const anchorsRef = useRef<Map<string, HTMLDivElement>>(new Map())
   const visibleShelvesRef = useRef<Set<string>>(new Set())
+  const programmaticScrollRef = useRef(false)
+  const programmaticScrollTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
     const root = scrollRef.current
@@ -46,6 +48,10 @@ export default function SkillsSection() {
 
     const observer = new IntersectionObserver(
       (entries) => {
+        // Ignore scroll-spy updates while a tab click is smooth-scrolling the shelf,
+        // otherwise the active tab flickers through whichever shelves pass by mid-scroll.
+        if (programmaticScrollRef.current) return
+
         entries.forEach((entry) => {
           const id = entry.target.getAttribute("data-shelf-id")
           if (!id) return
@@ -62,12 +68,20 @@ export default function SkillsSection() {
     )
 
     anchorsRef.current.forEach((node) => observer.observe(node))
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      clearTimeout(programmaticScrollTimeout.current)
+    }
   }, [])
 
   const handleTabClick = (shelfId: string) => {
     setActiveCategory(shelfId)
+    programmaticScrollRef.current = true
+    clearTimeout(programmaticScrollTimeout.current)
     anchorsRef.current.get(shelfId)?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" })
+    programmaticScrollTimeout.current = setTimeout(() => {
+      programmaticScrollRef.current = false
+    }, 800)
   }
 
   const scrollByAmount = (dir: 1 | -1) => {
@@ -82,13 +96,16 @@ export default function SkillsSection() {
 
   const openEntry = openIndex !== null ? flatSkills[openIndex] : null
 
+  const handleOpen = useCallback((index: number) => setOpenIndex(index), [])
+  const handleHoverStart = useCallback((index: number) => setHoveredIndex(index), [])
+
   const handleClose = () => {
     setOpenIndex(null)
     setHoveredIndex(null)
   }
 
   return (
-    <section id="skills" className="py-10 sm:py-14 relative">
+    <section id="skills" className="py-10 sm:py-14 relative overflow-x-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-6">
           <h2 className="flex items-center justify-center gap-3 text-lg sm:text-xl font-semibold text-white tracking-[0.2em] uppercase">
@@ -112,7 +129,7 @@ export default function SkillsSection() {
                   <button
                     key={shelf.id}
                     onClick={() => handleTabClick(shelf.id)}
-                    className={`relative shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide border transition-colors duration-300 ${
+                    className={`relative shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide border transition-colors duration-300 ${
                       isActive
                         ? "text-white border-[#6fa8ff]/70 bg-[#0d1730] shadow-[0_0_16px_rgba(90,150,255,0.35)]"
                         : "text-white/50 border-white/10 hover:text-white/80 hover:border-white/20"
@@ -147,9 +164,15 @@ export default function SkillsSection() {
               <ChevronRight className="w-4 h-4" />
             </button>
 
+            {/* Floating glass shelf — sits behind the books, entirely below their baseline */}
+            <div className="absolute left-1/4 right-1/4 bottom-0 h-3 bg-[#4d7fe0]/25 blur-2xl rounded-full pointer-events-none" />
+            <div className="absolute left-1 right-1 bottom-3 h-px bg-gradient-to-r from-transparent via-[#6fa8ff]/80 to-transparent pointer-events-none" style={{ boxShadow: "0 0 8px rgba(90,150,255,0.55)" }} />
+            <div className="absolute left-1 right-1 bottom-[15px] h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+            <div className="absolute left-1 right-1 bottom-0 h-2 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+
             <div
               ref={scrollRef}
-              className="flex items-end gap-[3px] overflow-x-auto scrollbar-thin pt-6 pb-6 px-1 -mx-1 snap-x snap-proximity"
+              className="relative flex items-end gap-1.5 overflow-x-auto scrollbar-thin pt-6 pb-6 px-1 -mx-1 snap-x snap-proximity"
               onMouseLeave={() => setHoveredIndex(null)}
             >
               {flatSkills.map((entry, index) => (
@@ -164,26 +187,18 @@ export default function SkillsSection() {
                   className="snap-start shrink-0"
                 >
                   <Book
+                    index={index}
                     skill={entry.skill}
                     accent={entry.accent}
                     isHovered={hoveredIndex === index}
                     pushX={getPushX(index)}
                     reduceMotion={reduceMotion}
-                    onOpen={() => setOpenIndex(index)}
-                    onHoverStart={() => setHoveredIndex(index)}
+                    onOpen={handleOpen}
+                    onHoverStart={handleHoverStart}
                   />
                 </div>
               ))}
             </div>
-
-            {/* Floating glass shelf */}
-            <div className="absolute left-1/4 right-1/4 bottom-3 h-4 bg-[#4d7fe0]/25 blur-2xl rounded-full pointer-events-none" />
-            <div className="absolute left-1 right-1 bottom-[27px] h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
-            <div
-              className="absolute left-1 right-1 bottom-6 h-px bg-gradient-to-r from-transparent via-[#6fa8ff]/80 to-transparent pointer-events-none"
-              style={{ boxShadow: "0 0 8px rgba(90,150,255,0.55)" }}
-            />
-            <div className="absolute left-1 right-1 bottom-[18px] h-2 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
           </div>
 
           {/* Open book — expands in flow below the shelf */}
@@ -201,7 +216,7 @@ export default function SkillsSection() {
                   <div className="relative bg-[#0c1120] border border-[#6fa8ff]/20 rounded-2xl shadow-[0_0_60px_rgba(60,100,200,0.15)] overflow-hidden">
                     {/* Bookmark ribbon */}
                     <div
-                      className="absolute -top-1 left-6 w-6 h-14 bg-[#3f6fd8] z-10"
+                      className="absolute top-0 left-6 w-6 h-14 bg-[#3f6fd8] z-10"
                       style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%)" }}
                     />
 
@@ -219,8 +234,8 @@ export default function SkillsSection() {
                       {/* LEFT PAGE */}
                       <div className="p-6 sm:p-8 md:border-r md:border-white/5">
                         <div className="flex items-center gap-3 mb-1.5">
-                          <openEntry.skill.icon className="w-7 h-7 text-[#8fb4f5]" />
-                          <h3 className="text-xl sm:text-2xl font-bold text-white">{openEntry.skill.name}</h3>
+                          <openEntry.skill.icon className="w-7 h-7 text-[#8fb4f5] shrink-0" />
+                          <h3 className="min-w-0 text-xl sm:text-2xl font-bold text-white">{openEntry.skill.name}</h3>
                         </div>
                         <p className="text-sm text-white/45 mb-6">{openEntry.skill.tagline}</p>
 
@@ -249,7 +264,6 @@ export default function SkillsSection() {
 
                       {/* RIGHT PAGE */}
                       <div className="relative p-6 sm:p-8 bg-black/20">
-                        <div className="absolute top-3 right-3 w-5 h-5 border-t border-r border-white/10 pointer-events-none" />
                         <div className="absolute bottom-3 left-3 w-5 h-5 border-b border-l border-white/10 pointer-events-none" />
 
                         <h4 className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8fb4f5] mb-4">
@@ -306,7 +320,7 @@ export default function SkillsSection() {
                           {openEntry.skill.related.map((tech) => (
                             <span
                               key={tech}
-                              className="px-2.5 py-1 text-xs font-medium bg-white/5 text-white border border-white/10 rounded-full"
+                              className="px-2.5 py-1 text-xs font-medium bg-white/5 text-white border border-white/10 rounded-full whitespace-nowrap"
                             >
                               {tech}
                             </span>

@@ -358,7 +358,7 @@ export default function ExperienceSection() {
           {/* Section Header */}
           <div className="text-center mb-8">
             <h2 className="text-base font-semibold text-white tracking-widest uppercase mb-4">
-              Mission Control
+              Experience and Leadership
             </h2>
             <p className="text-sm text-[#71717A] max-w-2xl mx-auto">
               Explore the missions that shaped my journey as an AI engineer, researcher and community leader.

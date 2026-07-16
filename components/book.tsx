@@ -1,17 +1,19 @@
 "use client"
 
+import { memo } from "react"
 import { motion } from "framer-motion"
 import { Sparkle } from "lucide-react"
 import type { Skill, ShelfAccent } from "@/lib/skills-data"
 
 interface BookProps {
+  index: number
   skill: Skill
   accent: ShelfAccent
   isHovered: boolean
   pushX: number
   reduceMotion: boolean
-  onOpen: () => void
-  onHoverStart: () => void
+  onOpen: (index: number) => void
+  onHoverStart: (index: number) => void
 }
 
 const SILVER = "#eef2fa"
@@ -20,7 +22,8 @@ function seedFor(name: string) {
   return name.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0)
 }
 
-export default function Book({
+function Book({
+  index,
   skill,
   accent,
   isHovered,
@@ -35,8 +38,8 @@ export default function Book({
   const baseTilt = ((seed % 7) - 3) * 0.5 // -1.5 .. 1.5 deg, permanent imperfection
   const isBlue = accent.tone === "blue"
 
-  const rest = { x: pushX, y: 0, rotateZ: baseTilt, rotateY: 0, scale: 1 }
-  const active = { x: pushX, y: -12, rotateZ: baseTilt - 3, rotateY: -18, scale: 1.06 }
+  const rest = { x: pushX, y: 0, rotateZ: baseTilt, rotateY: 0, scale: 1, zIndex: 0 }
+  const active = { x: pushX, y: -12, rotateZ: baseTilt - 3, rotateY: -18, scale: 1.06, zIndex: 10 }
 
   const glitterDots = isBlue
     ? Array.from({ length: 5 }, (_, i) => ({
@@ -50,13 +53,13 @@ export default function Book({
 
   return (
     <motion.button
-      onClick={onOpen}
-      onMouseEnter={onHoverStart}
-      onFocus={onHoverStart}
+      onClick={() => onOpen(index)}
+      onMouseEnter={() => onHoverStart(index)}
+      onFocus={() => onHoverStart(index)}
       className="group relative shrink-0 text-left outline-none"
-      style={{ width, height, perspective: 700 }}
+      style={{ width, height, perspective: 700, transformOrigin: "bottom center" }}
       animate={reduceMotion ? undefined : isHovered ? active : rest}
-      transition={{ type: "spring", stiffness: 260, damping: 22 }}
+      transition={{ type: "spring", stiffness: 220, damping: 26 }}
       whileTap={{ scale: 0.97 }}
       aria-label={`Open ${skill.name}`}
     >
@@ -197,7 +200,7 @@ export default function Book({
             filter: "blur(2px)",
           }}
           animate={{ x: isHovered ? "260%" : "-140%" }}
-          transition={{ duration: isHovered ? 0.9 : 0, ease: "easeInOut" }}
+          transition={{ duration: isHovered ? 0.9 : 0.45, ease: "easeInOut" }}
         />
 
         {/* brief sparkle burst on hover */}
@@ -261,3 +264,5 @@ export default function Book({
     </motion.button>
   )
 }
+
+export default memo(Book)
