@@ -1,6 +1,6 @@
 "use client"
 
-import { useSyncExternalStore } from "react"
+import { useMediaQuery } from "@/lib/use-media-query"
 
 export type PlanetVariant =
   | "flagship-moon"
@@ -83,18 +83,6 @@ const CONFIG: Record<PlanetVariant, VariantConfig> = {
     rimLight: "rgba(255, 170, 220, 0.85)",
     spin: 42,
   },
-}
-
-export function useMediaQuery(query: string) {
-  return useSyncExternalStore(
-    (onChange) => {
-      const mq = window.matchMedia(query)
-      mq.addEventListener("change", onChange)
-      return () => mq.removeEventListener("change", onChange)
-    },
-    () => window.matchMedia(query).matches,
-    () => false
-  )
 }
 
 function usePrefersReducedMotion() {

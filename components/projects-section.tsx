@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Github, ExternalLink, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Planet, { useMediaQuery, type PlanetVariant } from "@/components/planet"
+import Planet, { type PlanetVariant } from "@/components/planet"
+import { useMediaQuery } from "@/lib/use-media-query"
 
 interface Project {
   id: number
