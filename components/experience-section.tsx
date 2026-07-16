@@ -1,20 +1,11 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { X } from "lucide-react"
-
-interface Signal {
-  id: number
-  year: string
-  title: string
-  organization: string
-  description: string[]
-  x: number
-  y: number
-  intensity: number
-  pulseSpeed: number
-  pulseRadius: number
-}
+import { motion, AnimatePresence } from "framer-motion"
+import { X, Github, FileBadge, Images } from "lucide-react"
+import { missions, type Mission } from "@/lib/missions-data"
+import { useMediaQuery } from "@/lib/use-media-query"
+import MissionCraft from "@/components/mission-craft"
 
 interface BackgroundStar {
   x: number
@@ -45,131 +36,84 @@ interface ConstellationLine {
   active: boolean
 }
 
-const signals: Signal[] = [
-  {
-    id: 0,
-    year: "2023–2026",
-    title: "Innovation Ambassador",
-    organization: "Institution's Innovation Council (IIC), REC",
-    description: [
-      "Promoted innovation and entrepreneurship across campus",
-      "Acted as a bridge between IIC initiatives and student communities",
-      "Encouraged participation in innovation challenges and programs",
-      "Supported idea-stage students through guidance and exposure",
-    ],
-    x: 25,
-    y: 60,
-    intensity: 0.85,
-    pulseSpeed: 2.8,
-    pulseRadius: 50,
-  },
-  {
-    id: 1,
-    year: "2024",
-    title: "Events & Operations Head",
-    organization: "E-Cell, Raghu Engineering College",
-    description: [
-      "Organized and managed multiple on-campus and external events",
-      "Handled logistics, scheduling, and operational coordination",
-      "Worked closely with core teams to streamline execution workflows",
-      "Gained hands-on experience in large-scale event management",
-    ],
-    x: 45,
-    y: 35,
-    intensity: 0.9,
-    pulseSpeed: 2.5,
-    pulseRadius: 45,
-  },
-  {
-    id: 2,
-    year: "2025",
-    title: "Alumni & Community Relations Head",
-    organization: "E-Cell, Raghu Engineering College",
-    description: [
-      "Strengthened alumni engagement through structured communication initiatives",
-      "Built and maintained relationships with external mentors and professionals",
-      "Enabled knowledge sharing between alumni and current students",
-      "Supported community-driven programs and collaborations",
-    ],
-    x: 65,
-    y: 55,
-    intensity: 0.95,
-    pulseSpeed: 2.2,
-    pulseRadius: 40,
-  },
-  {
-    id: 3,
-    year: "2026",
-    title: "Events & PR Head",
-    organization: "E-Cell, Raghu Engineering College",
-    description: [
-      "Led end-to-end planning and execution of flagship entrepreneurial events",
-      "Managed external communications, promotions, and collaborations",
-      "Coordinated cross-team workflows to ensure smooth event delivery",
-      "Represented E-Cell in outreach and public-facing initiatives",
-    ],
-    x: 75,
-    y: 30,
-    intensity: 1.0,
-    pulseSpeed: 2.0,
-    pulseRadius: 35,
-  },
-]
+interface Asteroid {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  rotation: number
+  vr: number
+  opacity: number
+  points: { angle: number; radius: number }[]
+  active: boolean
+}
 
 export default function ExperienceSection() {
-  const [selectedSignal, setSelectedSignal] = useState<Signal | null>(null)
-  const [isPaused, setIsPaused] = useState(false)
+  const [selectedMission, setSelectedMission] = useState<Mission | null>(null)
+  const [transmittingId, setTransmittingId] = useState<number | null>(null)
+  const [transmitPhase, setTransmitPhase] = useState<"receiving" | "established">("receiving")
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null)
-  const [rotation, setRotation] = useState(0)
-  const animationRef = useRef<number>(0)
+  const [containerSize, setContainerSize] = useState<{ width: number; height: number } | null>(null)
+  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
+
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const animationRef = useRef<number>(0)
   const backgroundStarsRef = useRef<BackgroundStar[]>([])
   const shootingStarRef = useRef<ShootingStar | null>(null)
+  const asteroidRef = useRef<Asteroid | null>(null)
   const constellationLinesRef = useRef<ConstellationLine[]>([])
+  const hoveredPositionRef = useRef<{ x: number; y: number } | null>(null)
   const lastShootingStarTime = useRef<number>(0)
   const lastConstellationTime = useRef<number>(0)
+  const lastAsteroidTime = useRef<number>(0)
 
-  // Track cursor position
+  // Track cursor position (used for the subtle "lean toward cursor" hover tilt)
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
-      setCursorPosition({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      })
+      setCursorPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top })
     }
-
-    const handleMouseLeave = () => {
-      setCursorPosition(null)
-    }
+    const handleMouseLeave = () => setCursorPosition(null)
 
     const container = containerRef.current
     if (container) {
-      container.addEventListener('mousemove', handleMouseMove)
-      container.addEventListener('mouseleave', handleMouseLeave)
+      container.addEventListener("mousemove", handleMouseMove)
+      container.addEventListener("mouseleave", handleMouseLeave)
     }
-
     return () => {
       if (container) {
-        container.removeEventListener('mousemove', handleMouseMove)
-        container.removeEventListener('mouseleave', handleMouseLeave)
+        container.removeEventListener("mousemove", handleMouseMove)
+        container.removeEventListener("mouseleave", handleMouseLeave)
       }
     }
   }, [])
 
-  // Slow rotation animation (pauses on interaction)
+  // Cache container size (avoids reading the ref during render for tilt math)
   useEffect(() => {
-    if (selectedSignal || hoveredId !== null) return
+    const updateSize = () => {
+      if (containerRef.current) {
+        setContainerSize({ width: containerRef.current.offsetWidth, height: containerRef.current.offsetHeight })
+      }
+    }
+    updateSize()
+    window.addEventListener("resize", updateSize)
+    return () => window.removeEventListener("resize", updateSize)
+  }, [])
 
-    const rotationInterval = setInterval(() => {
-      setRotation((prev) => (prev + 0.1) % 360)
-    }, 100)
-
-    return () => clearInterval(rotationInterval)
-  }, [selectedSignal, hoveredId])
+  // Keep the canvas loop aware of which mission is hovered, for the "nearby stars brighten" effect
+  useEffect(() => {
+    if (hoveredId === null || !containerRef.current) {
+      hoveredPositionRef.current = null
+      return
+    }
+    const mission = missions.find((m) => m.id === hoveredId)
+    if (!mission) return
+    const rect = containerRef.current.getBoundingClientRect()
+    hoveredPositionRef.current = { x: (mission.x / 100) * rect.width, y: (mission.y / 100) * rect.height }
+  }, [hoveredId])
 
   // Initialize background stars
   useEffect(() => {
@@ -179,8 +123,7 @@ export default function ExperienceSection() {
     canvas.width = canvas.offsetWidth
     canvas.height = canvas.offsetHeight
 
-    // Create static background stars with fade behavior
-    backgroundStarsRef.current = Array.from({ length: 80 }, () => {
+    backgroundStarsRef.current = Array.from({ length: 90 }, () => {
       const opacity = Math.random() * 0.3 + 0.2
       return {
         x: Math.random() * canvas.width,
@@ -189,7 +132,7 @@ export default function ExperienceSection() {
         opacity,
         targetOpacity: opacity,
         fadeSpeed: Math.random() * 0.001 + 0.0005,
-        vx: (Math.random() - 0.5) * 0.03, // Slower diagonal drift
+        vx: (Math.random() - 0.5) * 0.03,
         vy: (Math.random() - 0.5) * 0.03,
       }
     })
@@ -200,121 +143,98 @@ export default function ExperienceSection() {
         canvas.height = canvas.offsetHeight
       }
     }
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // Animate background
+  // Animate background: stars, constellations, shooting stars, and a rare drifting asteroid
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext("2d")
     if (!ctx) return
 
     const animate = (time: number) => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
+      const shouldAnimate = !selectedMission && !reduceMotion
 
-      // Pause background motion when signal is selected
-      const shouldAnimate = !selectedSignal
-
-      // Draw and update background stars with slow drift and fade
       backgroundStarsRef.current.forEach((star) => {
         if (shouldAnimate) {
-          // Slow diagonal drift
           star.x += star.vx
           star.y += star.vy
-
-          // Wrap around edges
           if (star.x < 0) star.x = canvas.width
           if (star.x > canvas.width) star.x = 0
           if (star.y < 0) star.y = canvas.height
           if (star.y > canvas.height) star.y = 0
-
-          // Fade in and out softly
           if (Math.abs(star.opacity - star.targetOpacity) < 0.01) {
             star.targetOpacity = Math.random() * 0.3 + 0.2
           }
           star.opacity += (star.targetOpacity - star.opacity) * star.fadeSpeed
         }
 
-        // Draw star
-        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`
+        let drawOpacity = star.opacity
+        const hp = hoveredPositionRef.current
+        if (hp) {
+          const dx = star.x - hp.x
+          const dy = star.y - hp.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist < 130) drawOpacity = Math.min(1, star.opacity + (1 - dist / 130) * 0.5)
+        }
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${drawOpacity})`
         ctx.beginPath()
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2)
         ctx.fill()
       })
 
-      // Spawn fading constellation lines occasionally
       if (shouldAnimate && time - lastConstellationTime.current > 5000 + Math.random() * 5000) {
-        const star1Idx = Math.floor(Math.random() * backgroundStarsRef.current.length)
-        const star2Idx = Math.floor(Math.random() * backgroundStarsRef.current.length)
-        
-        if (star1Idx !== star2Idx) {
-          const star1 = backgroundStarsRef.current[star1Idx]
-          const star2 = backgroundStarsRef.current[star2Idx]
-          const dx = star1.x - star2.x
-          const dy = star1.y - star2.y
-          const distance = Math.sqrt(dx * dx + dy * dy)
-
-          if (distance < 150) {
-            constellationLinesRef.current.push({
-              star1Idx,
-              star2Idx,
-              opacity: 0.2,
-              fadeSpeed: 0.002,
-              active: true,
-            })
+        const i1 = Math.floor(Math.random() * backgroundStarsRef.current.length)
+        const i2 = Math.floor(Math.random() * backgroundStarsRef.current.length)
+        if (i1 !== i2) {
+          const s1 = backgroundStarsRef.current[i1]
+          const s2 = backgroundStarsRef.current[i2]
+          const dist = Math.hypot(s1.x - s2.x, s1.y - s2.y)
+          if (dist < 150) {
+            constellationLinesRef.current.push({ star1Idx: i1, star2Idx: i2, opacity: 0.2, fadeSpeed: 0.002, active: true })
           }
         }
         lastConstellationTime.current = time
       }
 
-      // Draw and fade constellation lines
       constellationLinesRef.current = constellationLinesRef.current.filter((line) => {
         if (!line.active || line.opacity <= 0) return false
-
-        const star1 = backgroundStarsRef.current[line.star1Idx]
-        const star2 = backgroundStarsRef.current[line.star2Idx]
-
+        const s1 = backgroundStarsRef.current[line.star1Idx]
+        const s2 = backgroundStarsRef.current[line.star2Idx]
         line.opacity -= line.fadeSpeed
         ctx.strokeStyle = `rgba(255, 255, 255, ${Math.max(0, line.opacity)})`
         ctx.lineWidth = 0.5
         ctx.beginPath()
-        ctx.moveTo(star1.x, star1.y)
-        ctx.lineTo(star2.x, star2.y)
+        ctx.moveTo(s1.x, s1.y)
+        ctx.lineTo(s2.x, s2.y)
         ctx.stroke()
-
         return line.opacity > 0
       })
 
-      // Draw static constellation lines (always visible, very faint)
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)'
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.08)"
       ctx.lineWidth = 0.5
       for (let i = 0; i < backgroundStarsRef.current.length; i++) {
         for (let j = i + 1; j < backgroundStarsRef.current.length; j++) {
-          const star1 = backgroundStarsRef.current[i]
-          const star2 = backgroundStarsRef.current[j]
-          const dx = star1.x - star2.x
-          const dy = star1.y - star2.y
-          const distance = Math.sqrt(dx * dx + dy * dy)
-
-          if (distance < 80) {
-            const opacity = (1 - distance / 80) * 0.08
-            ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`
+          const s1 = backgroundStarsRef.current[i]
+          const s2 = backgroundStarsRef.current[j]
+          const dist = Math.hypot(s1.x - s2.x, s1.y - s2.y)
+          if (dist < 80) {
+            ctx.strokeStyle = `rgba(255, 255, 255, ${(1 - dist / 80) * 0.08})`
             ctx.beginPath()
-            ctx.moveTo(star1.x, star1.y)
-            ctx.lineTo(star2.x, star2.y)
+            ctx.moveTo(s1.x, s1.y)
+            ctx.lineTo(s2.x, s2.y)
             ctx.stroke()
           }
         }
       }
 
-      // Shooting star logic
+      // Shooting star
       if (!shootingStarRef.current || !shootingStarRef.current.active) {
-        // Spawn new shooting star more frequently (3-8 seconds)
-        if (time - lastShootingStarTime.current > (3000 + Math.random() * 5000)) {
+        if (shouldAnimate && time - lastShootingStarTime.current > 3000 + Math.random() * 5000) {
           shootingStarRef.current = {
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height * 0.3,
@@ -327,31 +247,71 @@ export default function ExperienceSection() {
           lastShootingStarTime.current = time
         }
       } else {
-        const shooting = shootingStarRef.current
-        
-        // Update position
-        shooting.x += shooting.vx
-        shooting.y += shooting.vy
-        shooting.opacity -= 0.003
-
-        // Draw shooting star
-        if (shooting.opacity > 0) {
-          ctx.strokeStyle = `rgba(255, 255, 255, ${shooting.opacity})`
+        const s = shootingStarRef.current
+        s.x += s.vx
+        s.y += s.vy
+        s.opacity -= 0.003
+        if (s.opacity > 0) {
+          ctx.strokeStyle = `rgba(255, 255, 255, ${s.opacity})`
           ctx.lineWidth = 1.5
           ctx.beginPath()
-          ctx.moveTo(shooting.x, shooting.y)
-          ctx.lineTo(shooting.x - shooting.vx * 15, shooting.y - shooting.vy * 15)
+          ctx.moveTo(s.x, s.y)
+          ctx.lineTo(s.x - s.vx * 15, s.y - s.vy * 15)
           ctx.stroke()
-
-          // Glow effect
-          ctx.strokeStyle = `rgba(255, 255, 255, ${shooting.opacity * 0.3})`
+          ctx.strokeStyle = `rgba(255, 255, 255, ${s.opacity * 0.3})`
           ctx.lineWidth = 3
           ctx.beginPath()
-          ctx.moveTo(shooting.x, shooting.y)
-          ctx.lineTo(shooting.x - shooting.vx * 15, shooting.y - shooting.vy * 15)
+          ctx.moveTo(s.x, s.y)
+          ctx.lineTo(s.x - s.vx * 15, s.y - s.vy * 15)
           ctx.stroke()
         } else {
-          shooting.active = false
+          s.active = false
+        }
+      }
+
+      // Rare, slow, dim drifting asteroid
+      if (!asteroidRef.current || !asteroidRef.current.active) {
+        if (shouldAnimate && time - lastAsteroidTime.current > 18000 + Math.random() * 14000) {
+          const fromLeft = Math.random() > 0.5
+          const points = Array.from({ length: 6 }, (_, i) => ({
+            angle: (i / 6) * Math.PI * 2,
+            radius: 2 + Math.random() * 2,
+          }))
+          asteroidRef.current = {
+            x: fromLeft ? -20 : canvas.width + 20,
+            y: Math.random() * canvas.height * 0.6 + canvas.height * 0.1,
+            vx: (fromLeft ? 1 : -1) * (0.25 + Math.random() * 0.2),
+            vy: (Math.random() - 0.5) * 0.1,
+            rotation: 0,
+            vr: (Math.random() - 0.5) * 0.01,
+            opacity: 0.45,
+            points,
+            active: true,
+          }
+          lastAsteroidTime.current = time
+        }
+      } else {
+        const a = asteroidRef.current
+        a.x += a.vx
+        a.y += a.vy
+        a.rotation += a.vr
+        if (a.x < -30 || a.x > canvas.width + 30) {
+          a.active = false
+        } else {
+          ctx.save()
+          ctx.translate(a.x, a.y)
+          ctx.rotate(a.rotation)
+          ctx.fillStyle = `rgba(150, 165, 195, ${a.opacity})`
+          ctx.beginPath()
+          a.points.forEach((p, i) => {
+            const px = Math.cos(p.angle) * p.radius
+            const py = Math.sin(p.angle) * p.radius
+            if (i === 0) ctx.moveTo(px, py)
+            else ctx.lineTo(px, py)
+          })
+          ctx.closePath()
+          ctx.fill()
+          ctx.restore()
         }
       }
 
@@ -360,66 +320,35 @@ export default function ExperienceSection() {
 
     animationRef.current = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(animationRef.current)
-  }, [selectedSignal])
+  }, [selectedMission, reduceMotion])
 
-  const handleSignalClick = (signal: Signal) => {
-    setSelectedSignal(signal)
-    setIsPaused(true)
+  const handleMissionClick = (mission: Mission) => {
+    if (transmittingId !== null || selectedMission) return
+    setTransmittingId(mission.id)
+    setTransmitPhase("receiving")
+    setTimeout(() => setTransmitPhase("established"), 1000)
+    setTimeout(() => {
+      setSelectedMission(mission)
+      setTransmittingId(null)
+    }, 1500)
   }
 
   const handleClose = () => {
-    setSelectedSignal(null)
-    setIsPaused(false)
+    setSelectedMission(null)
+    setHoveredId(null)
   }
 
   const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      handleClose()
-    }
+    if (e.target === e.currentTarget) handleClose()
   }
 
-  // Calculate cursor proximity effect for each signal
-  const getSignalOffset = (signal: Signal) => {
-    if (!cursorPosition || !containerRef.current || selectedSignal) return { x: 0, y: 0 }
-
-    const rect = containerRef.current.getBoundingClientRect()
-    const signalX = (signal.x / 100) * rect.width
-    const signalY = (signal.y / 100) * rect.height
-
-    const dx = cursorPosition.x - signalX
-    const dy = cursorPosition.y - signalY
-    const distance = Math.sqrt(dx * dx + dy * dy)
-
-    // Magnetic pull within 100px
-    if (distance < 100 && distance > 0) {
-      const pullStrength = (1 - distance / 100) * 3
-      return {
-        x: (dx / distance) * pullStrength,
-        y: (dy / distance) * pullStrength,
-      }
-    }
-
-    return { x: 0, y: 0 }
-  }
-
-  // Check if cursor is near a signal
-  const getCursorProximity = (signal: Signal) => {
-    if (!cursorPosition || !containerRef.current) return 0
-
-    const rect = containerRef.current.getBoundingClientRect()
-    const signalX = (signal.x / 100) * rect.width
-    const signalY = (signal.y / 100) * rect.height
-
-    const dx = cursorPosition.x - signalX
-    const dy = cursorPosition.y - signalY
-    const distance = Math.sqrt(dx * dx + dy * dy)
-
-    // Return proximity factor (0-1) within 150px
-    if (distance < 150) {
-      return 1 - distance / 150
-    }
-
-    return 0
+  const getTilt = (mission: Mission) => {
+    if (!cursorPosition || !containerSize || hoveredId !== mission.id) return { x: 0, y: 0 }
+    const cx = (mission.x / 100) * containerSize.width
+    const cy = (mission.y / 100) * containerSize.height
+    const dx = (cursorPosition.x - cx) / 120
+    const dy = (cursorPosition.y - cy) / 120
+    return { x: Math.max(-1, Math.min(1, dx)), y: Math.max(-1, Math.min(1, dy)) }
   }
 
   return (
@@ -429,252 +358,335 @@ export default function ExperienceSection() {
           {/* Section Header */}
           <div className="text-center mb-8">
             <h2 className="text-base font-semibold text-white tracking-widest uppercase mb-4">
-              Experience and Leadership
+              Mission Control
             </h2>
             <p className="text-sm text-[#71717A] max-w-2xl mx-auto">
-              Each signal represents a phase of leadership, growth, and responsibility.
+              Explore the missions that shaped my journey as an AI engineer, researcher and community leader.
             </p>
           </div>
 
-          {/* Signals Visualization */}
-          <div 
+          {/* Desktop / tablet: mission visualization */}
+          <div
             ref={containerRef}
-            className="relative w-full bg-[#0A0A0A] border border-[#A1A1AA]/10 rounded-3xl overflow-hidden"
+            className="hidden sm:block relative w-full bg-[#05070d] border border-[#6fa8ff]/10 rounded-3xl overflow-hidden"
             style={{ height: "500px" }}
             onClick={handleBackdropClick}
           >
-            {/* Background Canvas - Stars & Constellations */}
-            <canvas
-              ref={canvasRef}
-              className="absolute inset-0 w-full h-full pointer-events-none"
-              style={{ opacity: 0.6 }}
-            />
+            {/* Nebula dust */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div
+                className="absolute w-[420px] h-[420px] rounded-full bg-[#3d5fd8]/[0.07] blur-3xl"
+                style={{ top: "-10%", left: "5%", animation: reduceMotion ? "none" : "nebula-drift-1 70s ease-in-out infinite" }}
+              />
+              <div
+                className="absolute w-[360px] h-[360px] rounded-full bg-[#6b4fd8]/[0.06] blur-3xl"
+                style={{ bottom: "-15%", right: "10%", animation: reduceMotion ? "none" : "nebula-drift-2 85s ease-in-out infinite" }}
+              />
+            </div>
 
-            {/* Ambient background effect */}
+            {/* Background Canvas */}
+            <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.7 }} />
+
             <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
 
-            {/* Hint Text at Top */}
-            {!selectedSignal && (
+            {!selectedMission && transmittingId === null && (
               <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center pointer-events-none">
-                <p className="text-sm text-[#71717A]">Click any signal to explore</p>
+                <p className="text-sm text-[#71717A] tracking-wide">Click a mission to receive its transmission</p>
               </div>
             )}
 
-            {/* Signal Nodes with subtle rotation */}
-            <svg 
-              className="absolute inset-0 w-full h-full transition-transform duration-[3000ms] ease-in-out"
-              style={{ 
-                transform: `rotate(${rotation}deg)`,
-                transformOrigin: 'center',
-              }}
-            >
-              {signals.map((signal) => {
-                const offset = getSignalOffset(signal)
-                const proximity = getCursorProximity(signal)
-                const cx = `calc(${signal.x}% + ${offset.x}px)`
-                const cy = `calc(${signal.y}% + ${offset.y}px)`
-                const isHovered = hoveredId === signal.id
-                const isSelected = selectedSignal?.id === signal.id
-                const isDimmed = selectedSignal && !isSelected
-                const nodeOpacity = isDimmed ? 0.4 : 1
+            {/* Mission crafts */}
+            {missions.map((mission) => {
+              const isHovered = hoveredId === mission.id
+              const isSelected = selectedMission?.id === mission.id
+              const isDimmed = Boolean(selectedMission) && !isSelected
 
-                // Tighter pulse when cursor is near
-                const pulseRadiusMultiplier = proximity > 0 ? 0.7 : 1
-
-                return (
-                  <g key={signal.id} opacity={nodeOpacity} className="transition-opacity duration-700 ease-in-out">
-                    {/* Pulse Rings - animate based on signal properties */}
-                    {!isPaused && !isDimmed && (
-                      <>
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={signal.pulseRadius * pulseRadiusMultiplier}
-                          fill="none"
-                          stroke="rgba(245, 245, 245, 0.3)"
-                          strokeWidth="1"
-                          opacity={signal.intensity * 0.6}
-                          className="animate-pulse-ring"
-                          style={{
-                            animation: `pulse-ring ${signal.pulseSpeed}s ease-out infinite`,
-                          }}
-                        />
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={signal.pulseRadius * pulseRadiusMultiplier}
-                          fill="none"
-                          stroke="rgba(245, 245, 245, 0.2)"
-                          strokeWidth="1"
-                          opacity={signal.intensity * 0.4}
-                          className="animate-pulse-ring"
-                          style={{
-                            animation: `pulse-ring ${signal.pulseSpeed}s ease-out infinite ${signal.pulseSpeed / 2}s`,
-                          }}
-                        />
-                      </>
-                    )}
-
-                    {/* Core Node */}
-                    <circle
-                      cx={cx}
-                      cy={cy}
-                      r={isSelected ? "18" : isHovered ? "16" : proximity > 0.5 ? "14" : "12"}
-                      fill={isSelected ? "#F5F5F5" : "rgba(245, 245, 245, 0.9)"}
-                      className="cursor-pointer transition-all duration-500 ease-out"
-                      onClick={() => handleSignalClick(signal)}
-                      onMouseEnter={() => setHoveredId(signal.id)}
-                      onMouseLeave={() => setHoveredId(null)}
-                      style={{
-                        filter: isSelected
-                          ? "drop-shadow(0 0 20px rgba(245, 245, 245, 0.8))"
-                          : isHovered
-                          ? `drop-shadow(0 0 ${12 + proximity * 6}px rgba(245, 245, 245, 0.6))`
-                          : `drop-shadow(0 0 8px rgba(245, 245, 245, ${signal.intensity * 0.5}))`,
-                      }}
+              return (
+                <div key={mission.id}>
+                  <div
+                    className="absolute"
+                    style={{ left: `${mission.x}%`, top: `${mission.y}%`, transform: "translate(-50%, -50%)" }}
+                  >
+                    <MissionCraft
+                      vehicle={mission.vehicle}
+                      isHovered={isHovered}
+                      isDimmed={isDimmed}
+                      reduceMotion={reduceMotion}
+                      tilt={getTilt(mission)}
+                      onClick={() => handleMissionClick(mission)}
+                      onHoverStart={() => setHoveredId(mission.id)}
+                      onHoverEnd={() => setHoveredId(null)}
                     />
 
-                    {/* Hover Label - Short title */}
-                    {isHovered && !selectedSignal && (
-                      <text
-                        x={cx}
-                        y={cy}
-                        dy="-25"
-                        textAnchor="middle"
-                        fill="#F5F5F5"
-                        fontSize="11"
-                        fontWeight="600"
-                        className="pointer-events-none select-none animate-fade-in"
-                      >
-                        {signal.title.split(' ').slice(0, 2).join(' ')}
-                      </text>
-                    )}
-
-                    {/* Year Label */}
-                    <text
-                      x={cx}
-                      y={cy}
-                      dy="40"
-                      textAnchor="middle"
-                      fill="#A1A1AA"
-                      fontSize="12"
-                      fontWeight="600"
-                      className="pointer-events-none select-none transition-opacity duration-300"
-                      style={{
-                        opacity: isSelected || isHovered ? 1 : 0.6,
-                      }}
-                    >
-                      {signal.year}
-                    </text>
-                  </g>
-                )
-              })}
-            </svg>
-
-            {/* Detail Panel */}
-            {selectedSignal && (
-              <div className="absolute right-0 top-0 bottom-0 w-full md:w-[450px] bg-[#111111] border-l border-[#A1A1AA]/20 p-8 overflow-y-auto animate-slide-in">
-                <button
-                  onClick={handleClose}
-                  className="absolute top-6 right-6 p-2 rounded-full bg-[#0A0A0A] border border-[#A1A1AA]/20 hover:border-[#A1A1AA]/40 transition-colors"
-                >
-                  <X className="h-4 w-4 text-[#F5F5F5]" />
-                </button>
-
-                <div className="space-y-6">
-                  {/* Year Badge */}
-                  <div className="inline-block px-4 py-2 bg-[#0A0A0A] border border-[#A1A1AA]/20 rounded-full">
-                    <span className="text-xs font-semibold text-[#F5F5F5] tracking-wider">
-                      {selectedSignal.year}
-                    </span>
-                  </div>
-
-                  {/* Title */}
-                  <div>
-                    <h3 className="text-2xl font-bold text-[#F5F5F5] mb-3">
-                      {selectedSignal.title}
-                    </h3>
-                    <p className="text-[#A1A1AA]">{selectedSignal.organization}</p>
-                  </div>
-
-                  {/* Impact Level */}
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-[#71717A]">Impact Level</span>
-                    <div className="flex-1 h-2 bg-[#0A0A0A] rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#F5F5F5] rounded-full transition-all duration-500"
-                        style={{ width: `${selectedSignal.intensity * 100}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-semibold text-[#F5F5F5]">
-                      {Math.round(selectedSignal.intensity * 100)}%
-                    </span>
-                  </div>
-
-                  {/* Description */}
-                  <div className="pt-4">
-                    <h4 className="text-sm font-semibold text-[#A1A1AA] uppercase tracking-wider mb-4">
-                      Key Contributions
-                    </h4>
-                    <ul className="space-y-3">
-                      {selectedSignal.description.map((item, i) => (
-                        <li key={i} className="flex items-start gap-3 text-[#A1A1AA]">
-                          <span className="text-[#F5F5F5] mt-1 text-lg">▹</span>
-                          <span className="flex-1">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    {/* Hover label */}
+                    <AnimatePresence>
+                      {isHovered && !selectedMission && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 6 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute top-full mt-3 left-1/2 -translate-x-1/2 whitespace-nowrap text-center pointer-events-none"
+                        >
+                          <p className="text-[10px] text-[#6fa8ff] tracking-widest uppercase mb-0.5">{mission.code}</p>
+                          <p className="text-sm font-semibold text-white">{mission.name}</p>
+                          <p className="text-xs text-white/50">{mission.role}</p>
+                          <p className="mt-1 flex items-center justify-center gap-1.5 text-[10px] text-emerald-400/80">
+                            <span className="w-1 h-1 rounded-full bg-emerald-400" /> Status: {mission.status}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
-              </div>
-            )}
+              )
+            })}
+
+            {/* Transmission sequence */}
+            <AnimatePresence>
+              {transmittingId !== null && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+                >
+                  <div className="text-center font-mono">
+                    <p className="text-sm tracking-widest text-[#6fa8ff] mb-4">
+                      {transmitPhase === "receiving" ? "RECEIVING TRANSMISSION..." : "CONNECTION ESTABLISHED"}
+                    </p>
+                    <div className="w-56 h-1.5 rounded-full bg-white/10 overflow-hidden mx-auto">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-[#6fa8ff] to-[#a78bff]"
+                        initial={{ width: "0%" }}
+                        animate={{ width: "100%" }}
+                        transition={{ duration: 1.5, ease: "linear" }}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Mission Log panel */}
+            <MissionPanel mission={selectedMission} onClose={handleClose} />
           </div>
 
-          {/* Legend */}
-          <div className="mt-8 flex items-center justify-center gap-8 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#F5F5F5] opacity-40" />
-              <span className="text-[#71717A]">Foundation</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#F5F5F5] opacity-70" />
-              <span className="text-[#71717A]">Growing</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#F5F5F5]" />
-              <span className="text-[#71717A]">Leadership</span>
-            </div>
+          {/* Mobile: vertical mission console */}
+          <div className="sm:hidden space-y-3">
+            {missions.map((mission) => (
+              <button
+                key={mission.id}
+                onClick={() => handleMissionClick(mission)}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-[#05070d] border border-[#6fa8ff]/10 text-left"
+              >
+                <div className="shrink-0 scale-[0.7] -mx-3">
+                  <MissionCraft
+                    vehicle={mission.vehicle}
+                    isHovered={false}
+                    isDimmed={false}
+                    reduceMotion={reduceMotion}
+                    tilt={{ x: 0, y: 0 }}
+                    onClick={() => handleMissionClick(mission)}
+                    onHoverStart={() => {}}
+                    onHoverEnd={() => {}}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] text-[#6fa8ff] tracking-widest uppercase mb-0.5">{mission.code}</p>
+                  <p className="text-sm font-semibold text-white truncate">{mission.name}</p>
+                  <p className="text-xs text-white/50 truncate">{mission.role}</p>
+                </div>
+                <span className="flex items-center gap-1.5 text-[10px] text-emerald-400/80 shrink-0">
+                  <span className="w-1 h-1 rounded-full bg-emerald-400" /> {mission.status}
+                </span>
+              </button>
+            ))}
+
+            {/* Transmission + panel reused on mobile via fixed overlay */}
+            <AnimatePresence>
+              {transmittingId !== null && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                >
+                  <div className="text-center font-mono px-6">
+                    <p className="text-sm tracking-widest text-[#6fa8ff] mb-4">
+                      {transmitPhase === "receiving" ? "RECEIVING TRANSMISSION..." : "CONNECTION ESTABLISHED"}
+                    </p>
+                    <div className="w-56 h-1.5 rounded-full bg-white/10 overflow-hidden mx-auto">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-[#6fa8ff] to-[#a78bff]"
+                        initial={{ width: "0%" }}
+                        animate={{ width: "100%" }}
+                        transition={{ duration: 1.5, ease: "linear" }}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {selectedMission && (
+              <div className="fixed inset-0 z-30">
+                <MissionPanel mission={selectedMission} onClose={handleClose} fullScreen />
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       <style jsx>{`
-        @keyframes pulse-ring {
-          0% {
-            r: 15;
-            opacity: 0.6;
-          }
-          100% {
-            r: 60;
-            opacity: 0;
-          }
+        @keyframes nebula-drift-1 {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(30px, 20px); }
         }
-
+        @keyframes nebula-drift-2 {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(-25px, -15px); }
+        }
         @keyframes slide-in {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
         }
-
         .animate-slide-in {
-          animation: slide-in 0.3s ease-out;
+          animation: slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
       `}</style>
     </section>
+  )
+}
+
+function MissionPanel({
+  mission,
+  onClose,
+  fullScreen,
+}: {
+  mission: Mission | null
+  onClose: () => void
+  fullScreen?: boolean
+}) {
+  if (!mission) return null
+
+  const hasLinks = mission.githubUrl || mission.certificateUrl || (mission.gallery && mission.gallery.length > 0)
+
+  return (
+    <div
+      className={`bg-[#0a0e1a] border-l border-[#6fa8ff]/20 p-8 overflow-y-auto animate-slide-in z-20 ${
+        fullScreen ? "absolute inset-0" : "absolute right-0 top-0 bottom-0 w-full md:w-[460px]"
+      }`}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-6 right-6 p-2 rounded-full bg-black/40 border border-[#6fa8ff]/20 hover:border-[#6fa8ff]/40 transition-colors"
+      >
+        <X className="h-4 w-4 text-white" />
+      </button>
+
+      <div className="space-y-6">
+        <div className="flex items-center justify-between pr-10">
+          <span className="text-xs font-semibold text-[#6fa8ff] tracking-widest uppercase">{mission.code}</span>
+          <span className="flex items-center gap-1.5 text-xs text-emerald-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            {mission.status}
+          </span>
+        </div>
+
+        <div>
+          <h3 className="text-2xl font-bold text-white mb-1">{mission.name}</h3>
+          <p className="text-white/50 text-sm">{mission.role}</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 p-4 rounded-xl border border-white/10 bg-white/[0.02] text-sm">
+          <div>
+            <p className="text-white/40 text-[10px] uppercase tracking-wider mb-1">Location</p>
+            <p className="text-white">{mission.location}</p>
+          </div>
+          <div>
+            <p className="text-white/40 text-[10px] uppercase tracking-wider mb-1">Duration</p>
+            <p className="text-white">{mission.duration}</p>
+          </div>
+          <div className="col-span-2">
+            <p className="text-white/40 text-[10px] uppercase tracking-wider mb-1">Mission Type</p>
+            <p className="text-white">{mission.missionType}</p>
+          </div>
+          {mission.project && (
+            <div className="col-span-2">
+              <p className="text-white/40 text-[10px] uppercase tracking-wider mb-1">Mission</p>
+              <p className="text-white">{mission.project}</p>
+            </div>
+          )}
+        </div>
+
+        <div>
+          <h4 className="text-xs font-semibold text-[#6fa8ff] uppercase tracking-wider mb-3">Responsibilities</h4>
+          <ul className="space-y-2.5">
+            {mission.responsibilities.map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-sm text-white/70">
+                <span className="text-[#6fa8ff] mt-0.5">▹</span>
+                <span className="flex-1">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-xs font-semibold text-[#6fa8ff] uppercase tracking-wider mb-3">Achievements</h4>
+          <ul className="space-y-2.5">
+            {mission.achievements.map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-sm text-white/70">
+                <span className="text-emerald-400 mt-0.5">✓</span>
+                <span className="flex-1">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-xs font-semibold text-[#6fa8ff] uppercase tracking-wider mb-3">Technologies Used</h4>
+          <div className="flex flex-wrap gap-2">
+            {mission.technologies.map((tech) => (
+              <span
+                key={tech}
+                className="px-3 py-1.5 text-xs font-medium bg-white/5 text-white border border-white/10 rounded-full"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {hasLinks && (
+          <div className="flex flex-wrap gap-3 pt-2">
+            {mission.githubUrl && (
+              <a
+                href={mission.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/30 text-sm text-white transition-colors"
+              >
+                <Github className="w-4 h-4" /> GitHub
+              </a>
+            )}
+            {mission.certificateUrl && (
+              <a
+                href={mission.certificateUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/30 text-sm text-white transition-colors"
+              >
+                <FileBadge className="w-4 h-4" /> Certificate
+              </a>
+            )}
+            {mission.gallery && mission.gallery.length > 0 && (
+              <span className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white">
+                <Images className="w-4 h-4" /> Gallery
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
