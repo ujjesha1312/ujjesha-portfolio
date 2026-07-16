@@ -4,17 +4,20 @@ import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Github, ExternalLink, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Planet, { useMediaQuery, type PlanetVariant } from "@/components/planet"
 
 interface Project {
   id: number
   title: string
   shortTitle: string
+  tagline: string
   description: string
   tags: string[]
   category: string
   liveUrl?: string
   githubUrl: string
   icon: string
+  planet: PlanetVariant
   orbitRadius: number
   orbitSpeed: number
   featured?: boolean
@@ -26,12 +29,14 @@ const projects: Project[] = [
     id: 0,
     title: "DisasterVision",
     shortTitle: "DisasterVision",
+    tagline: "AI-Powered Multimodal Disaster Intelligence Platform",
     description:
       "DisasterVision is an AI-powered platform developed during my AI/ML Internship at NRSC–ISRO. It analyzes disaster imagery using modern Vision-Language AI, combining computer vision, multimodal reasoning, and retrieval techniques to generate contextual insights and support faster disaster assessment. The platform also includes an intelligent chatbot that answers questions based on the uploaded image, providing an interactive and user-friendly experience.",
     tags: ["Python", "FastAPI", "React", "Tailwind CSS", "PyTorch", "Hugging Face Transformers", "Computer Vision", "Vision-Language Models", "RAG", "ChromaDB"],
     category: "Multimodal AI / Disaster Intelligence",
     githubUrl: "https://github.com/ujjesha1312/DisasterVision",
     icon: "🛰️",
+    planet: "flagship-moon",
     orbitRadius: 100,
     orbitSpeed: 38,
     featured: true,
@@ -41,12 +46,14 @@ const projects: Project[] = [
     id: 1,
     title: "AI-Powered Marketing Brochure Generator",
     shortTitle: "Marketing Brochure AI",
+    tagline: "Website-to-brochure generation with GPT-4",
     description:
       "A Python AI application that scrapes a company's website and uses OpenAI GPT-4 to automatically generate a well-structured marketing brochure. Perfect for quickly summarizing a company's key information for pitches or research. This tool combines web scraping with advanced language models to create professional marketing materials in minutes.",
     tags: ["Python", "OpenAI GPT-4", "BeautifulSoup", "Web Scraping", "Automation"],
     category: "AI / Web Scraping / Automation",
     githubUrl: "https://github.com/ujjesha1312/AI-powered-Marketing-Brochure-with-OpenAI",
     icon: "🎨",
+    planet: "sandstone-amber",
     orbitRadius: 140,
     orbitSpeed: 60,
   },
@@ -54,12 +61,14 @@ const projects: Project[] = [
     id: 2,
     title: "Airline AI Assistant (FlightAI)",
     shortTitle: "FlightAI Assistant",
+    tagline: "Conversational airline customer assistant",
     description:
       "An AI chatbot that answers customer queries for an airline project called FlightAI, including fetching ticket prices using GPT-4 with a Gradio interface. This conversational AI assistant provides instant responses to customer inquiries, making airline information accessible and user-friendly through natural language interactions.",
     tags: ["Python", "OpenAI GPT-4", "Gradio", "Chatbot", "Customer Service"],
     category: "Conversational AI / Chatbot",
     githubUrl: "https://github.com/ujjesha1312/Airline-assistant-project",
     icon: "✈️",
+    planet: "sky-cyan",
     orbitRadius: 140,
     orbitSpeed: 70,
   },
@@ -67,12 +76,14 @@ const projects: Project[] = [
     id: 3,
     title: "MinutesAI",
     shortTitle: "MinutesAI",
+    tagline: "Meeting transcripts to structured minutes",
     description:
       "A practical LLM project that processes raw meeting transcripts into structured minutes and extracts key action items. MinutesAI saves hours of manual work by automatically identifying important discussion points, decisions made, and tasks assigned during meetings. Built for teams who need efficient meeting documentation.",
     tags: ["Python", "LLM", "NLP", "Summarization", "Transcript Processing"],
     category: "NLP / AI",
     githubUrl: "https://github.com/ujjesha1312/minutes-ai-project",
     icon: "📝",
+    planet: "wave-cobalt",
     orbitRadius: 190,
     orbitSpeed: 50,
   },
@@ -80,12 +91,14 @@ const projects: Project[] = [
     id: 4,
     title: "Multimodal Airline Agent",
     shortTitle: "Multimodal Agent",
+    tagline: "Voice, image & chat in one assistant",
     description:
       "AI assistant for FlightAI that provides chatbot responses, retrieves ticket prices, generates destination images with DALL·E, and converts text responses to audio using OpenAI GPT-4. This multimodal system enhances user experience by combining text, image, and audio outputs for comprehensive airline assistance.",
     tags: ["Python", "OpenAI GPT-4", "DALL·E", "Gradio", "Multimodal AI", "Text-to-Speech"],
     category: "Multimodal AI",
     githubUrl: "https://github.com/ujjesha1312/Multimodal-Airline-Agent",
     icon: "🎭",
+    planet: "ringed-azure",
     orbitRadius: 190,
     orbitSpeed: 55,
   },
@@ -93,12 +106,14 @@ const projects: Project[] = [
     id: 5,
     title: "MemOrg AI (Enterprise RAG Platform)",
     shortTitle: "MemOrg AI",
+    tagline: "Enterprise RAG platform for unified knowledge",
     description:
       "Enterprise-grade RAG platform designed to unify organizational knowledge from Slack, Confluence, PDFs, and other sources, serving accurate AI answers with source citations. MemOrg AI helps teams instantly access company knowledge, reducing information silos and improving decision-making speed across the organization.",
     tags: ["GPT-4 Turbo", "ChromaDB", "Python", "Next.js", "RAG", "Embeddings", "Enterprise"],
     category: "RAG System / Enterprise Intelligence",
     githubUrl: "https://github.com/Vishal-code-E/Memorg",
     icon: "🧠",
+    planet: "grid-indigo",
     orbitRadius: 240,
     orbitSpeed: 45,
   },
@@ -106,12 +121,14 @@ const projects: Project[] = [
     id: 6,
     title: "NanoRAG Assistant",
     shortTitle: "NanoRAG",
+    tagline: "Lightweight modular RAG framework",
     description:
       "Lightweight modular RAG framework using GPT-4 Nano, combining document retrieval and large language models for grounded answers. NanoRAG provides a flexible foundation for building retrieval-augmented generation systems with minimal overhead, perfect for rapid prototyping and resource-constrained environments.",
     tags: ["Python", "FAISS", "GPT-4 Nano", "Vector Retrieval", "Gradio", "RAG"],
     category: "RAG / AI Systems",
     githubUrl: "https://github.com/ujjesha1312/nano-rag-assistant",
     icon: "⚡",
+    planet: "neural-violet",
     orbitRadius: 240,
     orbitSpeed: 40,
   },
@@ -119,12 +136,14 @@ const projects: Project[] = [
     id: 7,
     title: "Xpert-Chroma",
     shortTitle: "Xpert-Chroma",
+    tagline: "Agentic RAG built on ChromaDB",
     description:
       "Advanced Agentic RAG system built with ChromaDB for intelligent document retrieval, contextual search, and reasoning. Demonstrates deep understanding of how vector databases, embeddings, and agents interact in production systems. Built entirely from scratch without no-code AI platforms, showcasing real systems engineering in RAG pipelines.",
     tags: ["Python", "ChromaDB", "Vector Embeddings", "RAG Architecture", "Agentic AI", "LLMs"],
     category: "RAG System / Vector Database",
     githubUrl: "https://github.com/ujjesha1312/Xpert-Chroma",
     icon: "🔮",
+    planet: "chroma-prism",
     orbitRadius: 240,
     orbitSpeed: 48,
   },
@@ -133,6 +152,9 @@ const projects: Project[] = [
 export default function ProjectsSection() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [hoveredProject, setHoveredProject] = useState<number | null>(null)
+  const [armedProject, setArmedProject] = useState<number | null>(null)
+  const isTouchDevice = useMediaQuery("(hover: none)")
+  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
   const [time, setTime] = useState(0)
   const animationRef = useRef<number | undefined>(undefined)
 
@@ -164,6 +186,18 @@ export default function ProjectsSection() {
   const handleProjectClick = (project: Project) => {
     setSelectedProject(project)
     setHoveredProject(null)
+    setArmedProject(null)
+  }
+
+  const handlePlanetInteract = (project: Project) => {
+    // Touch devices don't get hover, so the first tap just arms/highlights
+    // the planet and the second tap opens it — mirrors desktop hover-then-click.
+    if (isTouchDevice && armedProject !== project.id) {
+      setArmedProject(project.id)
+      setHoveredProject(project.id)
+      return
+    }
+    handleProjectClick(project)
   }
 
   const getOrbitPosition = (project: Project, currentTime: number) => {
@@ -297,8 +331,13 @@ export default function ProjectsSection() {
                 {projects.map((project) => {
                   const pos = getOrbitPosition(project, time)
                   const isSelected = selectedProject?.id === project.id
-                  const isHovered = hoveredProject === project.id
+                  const isHovered = isTouchDevice
+                    ? armedProject === project.id
+                    : hoveredProject === project.id
                   const isDimmed = selectedProject && !isSelected
+                  const nodeSize = isSelected ? 96 : isHovered ? 72 : isDimmed ? 64 : project.featured ? 80 : 64
+                  const bobDuration = 4 + (project.id % 3)
+                  const bobDelay = (project.id % 4) * 0.35
 
                   return (
                     <motion.div
@@ -313,78 +352,102 @@ export default function ProjectsSection() {
                         ease: "easeInOut",
                       }}
                     >
-                      <motion.button
-                        className={`relative flex items-center justify-center rounded-full border transition-all duration-500 ease-out ${
-                          isSelected
-                            ? "w-24 h-24 bg-[#F5F5F5] border-[#F5F5F5] shadow-[0_0_40px_rgba(245,245,245,0.4)]"
-                            : isHovered
-                            ? "w-18 h-18 bg-[#111111] border-[#F5F5F5]/70 shadow-[0_0_25px_rgba(245,245,245,0.25)]"
-                            : isDimmed
-                            ? "w-16 h-16 bg-[#0A0A0A] border-[#A1A1AA]/20 opacity-40"
-                            : project.featured
-                            ? "w-20 h-20 bg-[#0A0A0A] border-[#F5F5F5]/60 shadow-[0_0_25px_rgba(245,245,245,0.25)]"
-                            : "w-16 h-16 bg-[#0A0A0A] border-[#A1A1AA]/40 shadow-[0_0_15px_rgba(245,245,245,0.15)]"
-                        }`}
-                        onClick={() => handleProjectClick(project)}
-                        onMouseEnter={() => setHoveredProject(project.id)}
-                        onMouseLeave={() => setHoveredProject(null)}
-                        whileHover={{ scale: isSelected ? 1 : 1.06 }}
-                        transition={{ duration: 0.3, ease: "easeOut" }}
-                        aria-label={`View ${project.title}`}
+                      <motion.div
+                        animate={reduceMotion ? {} : { y: [0, -5, 0] }}
+                        transition={{
+                          duration: bobDuration,
+                          delay: bobDelay,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
                       >
-                        {/* Soft glow halo behind icon */}
-                        {!isDimmed && (
-                          <div 
-                            className={`absolute inset-0 rounded-full transition-opacity duration-500 ${
-                              isSelected
-                                ? "bg-[#F5F5F5]/20 blur-xl opacity-100"
-                                : isHovered
-                                ? "bg-[#F5F5F5]/15 blur-lg opacity-100"
-                                : "bg-[#F5F5F5]/10 blur-lg opacity-60"
-                            }`}
-                            style={{ transform: 'scale(1.2)' }}
-                          />
-                        )}
-
-                        {/* Icon */}
-                        <span
-                          className={`relative z-10 transition-all duration-500 ease-out ${
-                            isSelected 
-                              ? "text-4xl filter grayscale" 
-                              : isHovered 
-                              ? "text-3xl" 
-                              : "text-2xl"
-                          }`}
+                        <motion.button
+                          className="relative flex items-center justify-center rounded-full transition-all duration-500 ease-out"
                           style={{
-                            filter: isSelected ? 'grayscale(100%) brightness(0.3)' : 'none',
+                            width: nodeSize,
+                            height: nodeSize,
+                            opacity: isDimmed ? 0.4 : 1,
                           }}
+                          onClick={() => handlePlanetInteract(project)}
+                          onMouseEnter={() => !isTouchDevice && setHoveredProject(project.id)}
+                          onMouseLeave={() => !isTouchDevice && setHoveredProject(null)}
+                          whileHover={{ scale: isSelected ? 1 : 1.06 }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
+                          aria-label={`View ${project.title}`}
                         >
-                          {project.icon}
-                        </span>
-
-                        {/* Pulse ring for selected */}
-                        {isSelected && (
-                          <motion.div
-                            className="absolute inset-0 rounded-full border-2 border-[#F5F5F5]/60"
-                            initial={{ scale: 1, opacity: 0.8 }}
-                            animate={{ scale: 1.6, opacity: 0 }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                              ease: "easeOut",
+                          {/* Contact shadow underneath */}
+                          <div
+                            className="absolute rounded-full bg-black transition-all duration-500 ease-out pointer-events-none"
+                            style={{
+                              width: nodeSize * 0.7,
+                              height: nodeSize * 0.18,
+                              bottom: -nodeSize * 0.14,
+                              left: "50%",
+                              transform: "translateX(-50%)",
+                              filter: `blur(${nodeSize * 0.08}px)`,
+                              opacity: isSelected ? 0.5 : isHovered ? 0.4 : 0.22,
                             }}
                           />
-                        )}
 
-                        {/* Featured badge */}
-                        {project.featured && !isSelected && (
-                          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#F5F5F5] flex items-center justify-center shadow-[0_0_10px_rgba(245,245,245,0.6)] z-20">
-                            <Star className="w-2.5 h-2.5 text-black fill-black" />
+                          {/* Soft ambient bloom behind planet */}
+                          {!isDimmed && (
+                            <div
+                              className={`absolute inset-0 rounded-full transition-opacity duration-500 ${
+                                isSelected
+                                  ? "bg-[#F5F5F5]/15 blur-xl opacity-100"
+                                  : isHovered
+                                  ? "bg-[#F5F5F5]/10 blur-lg opacity-100"
+                                  : "bg-[#F5F5F5]/5 blur-lg opacity-60"
+                              }`}
+                              style={{ transform: "scale(1.2)" }}
+                            />
+                          )}
+
+                          {/* Planet */}
+                          <div className="relative z-10">
+                            <Planet
+                              variant={project.planet}
+                              size={nodeSize}
+                              isSelected={isSelected}
+                              isHovered={isHovered}
+                            />
                           </div>
-                        )}
-                      </motion.button>
 
-                      {/* Tooltip on hover */}
+                          {/* Arrival flash — one-shot burst when this planet becomes selected */}
+                          {isSelected && (
+                            <motion.div
+                              key={`arrival-${project.id}`}
+                              className="absolute inset-0 rounded-full border-2 border-[#F5F5F5]/70"
+                              initial={{ scale: 0.5, opacity: 0.9 }}
+                              animate={{ scale: 2.2, opacity: 0 }}
+                              transition={{ duration: 0.8, ease: "easeOut" }}
+                            />
+                          )}
+
+                          {/* Pulse ring for selected */}
+                          {isSelected && (
+                            <motion.div
+                              className="absolute inset-0 rounded-full border-2 border-[#F5F5F5]/60"
+                              initial={{ scale: 1, opacity: 0.8 }}
+                              animate={{ scale: 1.6, opacity: 0 }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "easeOut",
+                              }}
+                            />
+                          )}
+
+                          {/* Featured badge */}
+                          {project.featured && !isSelected && (
+                            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#F5F5F5] flex items-center justify-center shadow-[0_0_10px_rgba(245,245,245,0.6)] z-20">
+                              <Star className="w-2.5 h-2.5 text-black fill-black" />
+                            </div>
+                          )}
+                        </motion.button>
+                      </motion.div>
+
+                      {/* Tooltip on hover / first tap */}
                       <AnimatePresence>
                         {isHovered && !isSelected && (
                           <motion.div
@@ -395,8 +458,12 @@ export default function ProjectsSection() {
                             className="absolute top-full mt-3 left-1/2 -translate-x-1/2 flex flex-col items-center whitespace-nowrap px-4 py-2 bg-[#111111] border border-[#A1A1AA]/30 rounded-lg shadow-lg pointer-events-none z-20"
                           >
                             <span className="text-sm font-medium text-[#F5F5F5]">{project.shortTitle}</span>
+                            <span className="text-xs text-[#A1A1AA] mt-0.5 max-w-[180px] text-center text-wrap whitespace-normal">
+                              {project.tagline}
+                            </span>
                             {project.featured && (
-                              <span className="text-[10px] font-semibold text-[#A1A1AA] tracking-wider uppercase mt-0.5">
+                              <span className="flex items-center gap-1 text-[10px] font-semibold text-[#F5F5F5] tracking-wider uppercase mt-1.5">
+                                <Star className="w-2.5 h-2.5 fill-[#F5F5F5]" />
                                 Featured Project
                               </span>
                             )}
