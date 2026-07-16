@@ -12,6 +12,7 @@ export interface ShelfAccent {
   spineTo: string
   rim: string
   foil: string
+  tone: "white" | "blue"
 }
 
 export interface Shelf {
@@ -26,10 +27,12 @@ export const shelves: Shelf[] = [
     id: "programming",
     title: "Programming",
     accent: {
-      spineFrom: "#243252",
-      spineTo: "#0b1020",
-      rim: "rgba(120, 150, 200, 0.35)",
-      foil: "#d9e0ea",
+      // Midnight Blue
+      spineFrom: "#22345c",
+      spineTo: "#050810",
+      rim: "rgba(90, 145, 225, 0.45)",
+      foil: "#e8edf6",
+      tone: "blue",
     },
     skills: [
       {
@@ -68,10 +71,12 @@ export const shelves: Shelf[] = [
     id: "core-cs",
     title: "Core CS",
     accent: {
-      spineFrom: "#4a3222",
-      spineTo: "#1c1108",
-      rim: "rgba(200, 150, 90, 0.3)",
-      foil: "#e8c77a",
+      // Pearl White
+      spineFrom: "#f5f3ef",
+      spineTo: "#cacdd7",
+      rim: "rgba(160, 190, 230, 0.4)",
+      foil: "#1c2540",
+      tone: "white",
     },
     skills: [
       {
@@ -116,10 +121,12 @@ export const shelves: Shelf[] = [
     id: "ai-ml",
     title: "AI / ML",
     accent: {
-      spineFrom: "#3d1f52",
-      spineTo: "#170a22",
-      rim: "rgba(180, 120, 220, 0.35)",
-      foil: "#e6c887",
+      // Deep Space Blue
+      spineFrom: "#141b33",
+      spineTo: "#020308",
+      rim: "rgba(110, 155, 255, 0.5)",
+      foil: "#eef2f9",
+      tone: "blue",
     },
     skills: [
       {
@@ -212,10 +219,12 @@ export const shelves: Shelf[] = [
     id: "frameworks",
     title: "Frameworks",
     accent: {
-      spineFrom: "#173f30",
-      spineTo: "#071c15",
-      rim: "rgba(100, 200, 150, 0.3)",
-      foil: "#e3c584",
+      // Sapphire Blue
+      spineFrom: "#28579e",
+      spineTo: "#0a1a34",
+      rim: "rgba(110, 170, 255, 0.45)",
+      foil: "#f1f5fb",
+      tone: "blue",
     },
     skills: [
       {
@@ -259,10 +268,12 @@ export const shelves: Shelf[] = [
     id: "tools",
     title: "Dev Tools",
     accent: {
-      spineFrom: "#3a4048",
-      spineTo: "#16191d",
-      rim: "rgba(160, 175, 190, 0.3)",
-      foil: "#dfe3e8",
+      // Ice White
+      spineFrom: "#e8eff7",
+      spineTo: "#b8c4d7",
+      rim: "rgba(140, 180, 230, 0.4)",
+      foil: "#161f38",
+      tone: "white",
     },
     skills: [
       {

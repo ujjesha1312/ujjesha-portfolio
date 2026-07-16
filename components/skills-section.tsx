@@ -149,9 +149,14 @@ export default function SkillsSection() {
                 </AnimatePresence>
               </div>
 
-              {/* Shelf ledge */}
-              <div className="absolute left-1 right-1 bottom-6 h-px bg-gradient-to-r from-transparent via-[#A1A1AA]/25 to-transparent pointer-events-none" />
-              <div className="absolute left-1 right-1 bottom-[22px] h-2 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+              {/* Floating glass shelf */}
+              <div className="absolute left-1/4 right-1/4 bottom-3 h-4 bg-[#4d7fe0]/25 blur-2xl rounded-full pointer-events-none" />
+              <div className="absolute left-1 right-1 bottom-[27px] h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+              <div
+                className="absolute left-1 right-1 bottom-6 h-px bg-gradient-to-r from-transparent via-[#6fa8ff]/80 to-transparent pointer-events-none"
+                style={{ boxShadow: "0 0 8px rgba(90,150,255,0.55)" }}
+              />
+              <div className="absolute left-1 right-1 bottom-[18px] h-2 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
             </div>
 
             {/* Open book overlay — expands in place within this same box */}
