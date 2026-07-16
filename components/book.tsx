@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { Sparkle } from "lucide-react"
 import type { Skill, ShelfAccent } from "@/lib/skills-data"
 
 interface BookProps {
@@ -8,9 +9,8 @@ interface BookProps {
   accent: ShelfAccent
   isHovered: boolean
   pushX: number
-  leanDeg: number
   reduceMotion: boolean
-  onOpen: (rect: DOMRect) => void
+  onOpen: () => void
   onHoverStart: () => void
 }
 
@@ -25,7 +25,6 @@ export default function Book({
   accent,
   isHovered,
   pushX,
-  leanDeg,
   reduceMotion,
   onOpen,
   onHoverStart,
@@ -36,7 +35,7 @@ export default function Book({
   const baseTilt = ((seed % 7) - 3) * 0.5 // -1.5 .. 1.5 deg, permanent imperfection
   const isBlue = accent.tone === "blue"
 
-  const rest = { x: pushX, y: 0, rotateZ: baseTilt + leanDeg, rotateY: 0, scale: 1 }
+  const rest = { x: pushX, y: 0, rotateZ: baseTilt, rotateY: 0, scale: 1 }
   const active = { x: pushX, y: -12, rotateZ: baseTilt - 3, rotateY: -18, scale: 1.06 }
 
   const glitterDots = isBlue
@@ -47,9 +46,11 @@ export default function Book({
       }))
     : []
 
+  const SkillIcon = skill.icon
+
   return (
     <motion.button
-      onClick={(e) => onOpen(e.currentTarget.getBoundingClientRect())}
+      onClick={onOpen}
       onMouseEnter={onHoverStart}
       onFocus={onHoverStart}
       className="group relative shrink-0 text-left outline-none"
@@ -147,9 +148,21 @@ export default function Book({
           }}
         />
 
+        {/* spine icon */}
+        <div className="absolute inset-x-0 top-[6%] flex justify-center pointer-events-none">
+          <SkillIcon
+            className="w-3 h-3"
+            style={{
+              color: accent.foil,
+              opacity: 0.9,
+              filter: isBlue ? "drop-shadow(0 0 3px rgba(140,175,255,0.6))" : "none",
+            }}
+          />
+        </div>
+
         {/* embossed title, vertical */}
         <motion.div
-          className="absolute inset-0 flex items-center justify-center px-1"
+          className="absolute inset-x-0 top-[18%] bottom-[18%] flex items-center justify-center px-1"
           style={{ writingMode: "vertical-rl" }}
           animate={{ filter: isHovered ? "brightness(1.2)" : "brightness(1)" }}
           transition={{ duration: 0.4 }}
@@ -166,6 +179,14 @@ export default function Book({
             {skill.name}
           </span>
         </motion.div>
+
+        {/* spine star */}
+        <div className="absolute inset-x-0 bottom-[6%] flex justify-center pointer-events-none">
+          <Sparkle
+            className="w-2.5 h-2.5"
+            style={{ color: accent.foil, opacity: 0.75 }}
+          />
+        </div>
 
         {/* hover sheen sweep — light traveling across the cover */}
         <motion.div
