@@ -166,10 +166,8 @@ export default function ProjectsSection() {
       const deltaTime = (currentTime - lastTime) / 1000
       lastTime = currentTime
 
-      // Only update time if no project is selected (orbit continues)
-      if (!selectedProject) {
-        setTime((prev) => prev + deltaTime)
-      }
+      // The orbit never stops — it keeps revolving whether or not a project is selected.
+      setTime((prev) => prev + deltaTime)
 
       animationRef.current = requestAnimationFrame(animate)
     }
@@ -181,7 +179,7 @@ export default function ProjectsSection() {
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [selectedProject])
+  }, [])
 
   const handleProjectClick = (project: Project) => {
     setSelectedProject(project)
@@ -201,23 +199,7 @@ export default function ProjectsSection() {
   }
 
   const getOrbitPosition = (project: Project, currentTime: number) => {
-    // If this project is selected, lock it at top center
-    if (selectedProject?.id === project.id) {
-      return { x: 0, y: -180 }
-    }
-
-    // If any project is hovered, pause its orbit at current position
-    if (hoveredProject === project.id) {
-      // Calculate paused position
-      const pausedTime = currentTime
-      const angle = (pausedTime / project.orbitSpeed) * Math.PI * 2
-      return {
-        x: Math.cos(angle) * project.orbitRadius,
-        y: Math.sin(angle) * project.orbitRadius,
-      }
-    }
-
-    // Calculate orbital position based on time
+    // Every planet — selected, hovered, or idle — always keeps revolving on its orbit.
     const angle = (currentTime / project.orbitSpeed) * Math.PI * 2
     const x = Math.cos(angle) * project.orbitRadius
     const y = Math.sin(angle) * project.orbitRadius
@@ -335,7 +317,7 @@ export default function ProjectsSection() {
                     ? armedProject === project.id
                     : hoveredProject === project.id
                   const isDimmed = selectedProject && !isSelected
-                  const nodeSize = isSelected ? 96 : isHovered ? 72 : isDimmed ? 64 : project.featured ? 80 : 64
+                  const nodeSize = isSelected ? 76 : isHovered ? 56 : isDimmed ? 50 : project.featured ? 64 : 50
                   const bobDuration = 4 + (project.id % 3)
                   const bobDelay = (project.id % 4) * 0.35
 
@@ -348,8 +330,8 @@ export default function ProjectsSection() {
                         y: pos.y,
                       }}
                       transition={{
-                        duration: isSelected ? 0.6 : 0.3,
-                        ease: "easeInOut",
+                        duration: 0.3,
+                        ease: "linear",
                       }}
                     >
                       <motion.div
@@ -440,8 +422,8 @@ export default function ProjectsSection() {
 
                           {/* Featured badge */}
                           {project.featured && !isSelected && (
-                            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#F5F5F5] flex items-center justify-center shadow-[0_0_10px_rgba(245,245,245,0.6)] z-20">
-                              <Star className="w-2.5 h-2.5 text-black fill-black" />
+                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#F5F5F5] flex items-center justify-center shadow-[0_0_10px_rgba(245,245,245,0.6)] z-20">
+                              <Star className="w-2 h-2 text-black fill-black" />
                             </div>
                           )}
                         </motion.button>
