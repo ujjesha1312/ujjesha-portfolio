@@ -93,7 +93,7 @@ export default function SkillsSection() {
         <div className="text-center mb-6">
           <h2 className="flex items-center justify-center gap-3 text-lg sm:text-xl font-semibold text-white tracking-[0.2em] uppercase">
             <Sparkle className="w-4 h-4 text-[#6fa8ff]" />
-            Knowledge Library
+            Skills and Expertise
             <Sparkle className="w-4 h-4 text-[#6fa8ff]" />
           </h2>
           <div className="mx-auto mt-2 mb-3 h-px w-40 bg-gradient-to-r from-transparent via-[#6fa8ff]/70 to-transparent" />
