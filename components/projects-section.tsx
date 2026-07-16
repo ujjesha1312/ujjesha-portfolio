@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Github, ExternalLink } from "lucide-react"
+import { Github, ExternalLink, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface Project {
@@ -17,9 +17,26 @@ interface Project {
   icon: string
   orbitRadius: number
   orbitSpeed: number
+  featured?: boolean
+  badge?: string
 }
 
 const projects: Project[] = [
+  {
+    id: 0,
+    title: "DisasterVision",
+    shortTitle: "DisasterVision",
+    description:
+      "DisasterVision is an AI-powered platform developed during my AI/ML Internship at NRSC–ISRO. It analyzes disaster imagery using modern Vision-Language AI, combining computer vision, multimodal reasoning, and retrieval techniques to generate contextual insights and support faster disaster assessment. The platform also includes an intelligent chatbot that answers questions based on the uploaded image, providing an interactive and user-friendly experience.",
+    tags: ["Python", "FastAPI", "React", "Tailwind CSS", "PyTorch", "Hugging Face Transformers", "Computer Vision", "Vision-Language Models", "RAG", "ChromaDB"],
+    category: "Multimodal AI / Disaster Intelligence",
+    githubUrl: "https://github.com/ujjesha1312/DisasterVision",
+    icon: "🛰️",
+    orbitRadius: 100,
+    orbitSpeed: 38,
+    featured: true,
+    badge: "Featured · Built during NRSC–ISRO Internship",
+  },
   {
     id: 1,
     title: "AI-Powered Marketing Brochure Generator",
@@ -209,6 +226,22 @@ export default function ProjectsSection() {
                 className="absolute inset-0 w-full h-full pointer-events-none"
                 style={{ maxWidth: "550px", maxHeight: "550px", margin: "auto" }}
               >
+                {/* Featured orbit (100px) */}
+                <circle
+                  cx="50%"
+                  cy="50%"
+                  r="100"
+                  fill="none"
+                  stroke="rgba(245,245,245,1)"
+                  strokeWidth="0.8"
+                  className="transition-all duration-500"
+                  style={{
+                    opacity:
+                      selectedProject && selectedProject.id === 0 ? 0.2 :
+                      hoveredProject === 0 ? 0.18 :
+                      selectedProject ? 0.08 : 0.14
+                  }}
+                />
                 {/* Inner orbit (140px) */}
                 <circle
                   cx="50%"
@@ -288,6 +321,8 @@ export default function ProjectsSection() {
                             ? "w-18 h-18 bg-[#111111] border-[#F5F5F5]/70 shadow-[0_0_25px_rgba(245,245,245,0.25)]"
                             : isDimmed
                             ? "w-16 h-16 bg-[#0A0A0A] border-[#A1A1AA]/20 opacity-40"
+                            : project.featured
+                            ? "w-20 h-20 bg-[#0A0A0A] border-[#F5F5F5]/60 shadow-[0_0_25px_rgba(245,245,245,0.25)]"
                             : "w-16 h-16 bg-[#0A0A0A] border-[#A1A1AA]/40 shadow-[0_0_15px_rgba(245,245,245,0.15)]"
                         }`}
                         onClick={() => handleProjectClick(project)}
@@ -340,6 +375,13 @@ export default function ProjectsSection() {
                             }}
                           />
                         )}
+
+                        {/* Featured badge */}
+                        {project.featured && !isSelected && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#F5F5F5] flex items-center justify-center shadow-[0_0_10px_rgba(245,245,245,0.6)] z-20">
+                            <Star className="w-2.5 h-2.5 text-black fill-black" />
+                          </div>
+                        )}
                       </motion.button>
 
                       {/* Tooltip on hover */}
@@ -350,9 +392,14 @@ export default function ProjectsSection() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 10 }}
                             transition={{ duration: 0.2 }}
-                            className="absolute top-full mt-3 left-1/2 -translate-x-1/2 whitespace-nowrap px-4 py-2 bg-[#111111] border border-[#A1A1AA]/30 rounded-lg text-sm font-medium text-[#F5F5F5] shadow-lg pointer-events-none z-20"
+                            className="absolute top-full mt-3 left-1/2 -translate-x-1/2 flex flex-col items-center whitespace-nowrap px-4 py-2 bg-[#111111] border border-[#A1A1AA]/30 rounded-lg shadow-lg pointer-events-none z-20"
                           >
-                            {project.shortTitle}
+                            <span className="text-sm font-medium text-[#F5F5F5]">{project.shortTitle}</span>
+                            {project.featured && (
+                              <span className="text-[10px] font-semibold text-[#A1A1AA] tracking-wider uppercase mt-0.5">
+                                Featured Project
+                              </span>
+                            )}
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -376,12 +423,33 @@ export default function ProjectsSection() {
                     style={{ minHeight: "500px" }}
                   >
                     {/* Subtle depth background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0A]/40 via-transparent to-[#0A0A0A]/20 rounded-3xl" />
-                    
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br from-[#0A0A0A]/40 via-transparent to-[#0A0A0A]/20 rounded-3xl ${
+                        selectedProject.featured
+                          ? "ring-1 ring-[#F5F5F5]/10 shadow-[0_0_60px_rgba(245,245,245,0.06)]"
+                          : ""
+                      }`}
+                    />
+
                     {/* Content container */}
                     <div className="relative p-10">
+                      {/* Featured badge */}
+                      {selectedProject.badge && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.05, duration: 0.5 }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 mb-5 bg-[#111111] border border-[#A1A1AA]/30 rounded-full"
+                        >
+                          <Star className="w-3 h-3 text-[#F5F5F5] fill-[#F5F5F5]" />
+                          <span className="text-[10px] font-semibold text-[#F5F5F5] tracking-wider uppercase">
+                            {selectedProject.badge}
+                          </span>
+                        </motion.div>
+                      )}
+
                       {/* Icon & Title */}
-                      <motion.div 
+                      <motion.div
                         className="flex items-start gap-4 mb-8"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
