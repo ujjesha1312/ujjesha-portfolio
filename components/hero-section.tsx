@@ -15,8 +15,9 @@ export default function HeroSection() {
   const nameContainerRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
-    setIsVisible(true)
-    
+    // Deferred a frame so this doesn't set state synchronously inside the effect body.
+    const revealFrame = requestAnimationFrame(() => setIsVisible(true))
+
     // Initial shimmer completes after letter animations
     const shimmerTimer = setTimeout(() => {
       setShimmerComplete(true)
@@ -37,6 +38,7 @@ export default function HeroSection() {
     window.addEventListener("mousemove", handleMouseMove)
     return () => {
       window.removeEventListener("mousemove", handleMouseMove)
+      cancelAnimationFrame(revealFrame)
       clearTimeout(shimmerTimer)
       clearInterval(breathingInterval)
       waveTimersRef.current.forEach(timer => clearTimeout(timer))
@@ -131,8 +133,8 @@ export default function HeroSection() {
 
       {/* Main Container */}
       <div className="container mx-auto px-6 lg:px-16 xl:px-24 relative z-10 h-full">
-        {/* Top Navigation - Centered at Top */}
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 z-20">
+        {/* Top Navigation - Centered at Top (desktop only; mobile uses the slide-out nav) */}
+        <div className="hidden lg:block absolute top-8 left-1/2 -translate-x-1/2 z-20">
           <nav
             className={
               "transition-all duration-1200 delay-300 " +
@@ -191,7 +193,7 @@ export default function HeroSection() {
                     animation: isVisible ? 'gentleSlide 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both' : 'none',
                   }}
                 >
-                  I'm
+                  I&apos;m
                 </span>
               </div>
               

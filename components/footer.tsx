@@ -27,7 +27,7 @@ export default function Footer() {
               </h3>
               <p className="text-[#A1A1AA] mb-4 max-w-md">
                 Building intelligent systems and meaningful technology. Focused on AI, scalable architectures, 
-                and community-driven innovation. Let's create something impactful together.
+                and community-driven innovation. Let&apos;s create something impactful together.
               </p>
               <div className="flex gap-4">
                 <a

@@ -9,7 +9,8 @@ interface AiCoreProps {
   activeCategory: string
 }
 
-const CORE_SIZE = 320
+const CORE_SIZE_DESKTOP = 320
+const CORE_SIZE_MOBILE = 224
 
 const STARS = [
   { x: 10, y: 16, size: 1.3, delay: 0 },
@@ -26,12 +27,19 @@ interface RingConfig {
   duration: number
 }
 
-const RINGS: [RingConfig, RingConfig] = [
-  { radius: 78, duration: 22 },
-  { radius: 122, duration: 34 },
-]
-
-function OrbitRing({ skills, ring, reduceMotion }: { skills: Skill[]; ring: RingConfig; reduceMotion: boolean }) {
+function OrbitRing({
+  skills,
+  ring,
+  badgeSize,
+  iconSize,
+  reduceMotion,
+}: {
+  skills: Skill[]
+  ring: RingConfig
+  badgeSize: number
+  iconSize: number
+  reduceMotion: boolean
+}) {
   if (skills.length === 0) return null
 
   return (
@@ -61,10 +69,10 @@ function OrbitRing({ skills, ring, reduceMotion }: { skills: Skill[]; ring: Ring
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.3 }}
                     transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                    className="w-9 h-9 rounded-full bg-black/70 border border-[#6fa8ff]/40 backdrop-blur-sm flex items-center justify-center"
-                    style={{ boxShadow: "0 0 12px rgba(111,168,255,0.35)" }}
+                    className="rounded-full bg-black/70 border border-[#6fa8ff]/40 backdrop-blur-sm flex items-center justify-center"
+                    style={{ width: badgeSize, height: badgeSize, boxShadow: "0 0 12px rgba(111,168,255,0.35)" }}
                   >
-                    <SkillIcon className="w-4 h-4 text-[#a8c0ff]" />
+                    <SkillIcon style={{ width: iconSize, height: iconSize }} className="text-[#a8c0ff]" />
                   </motion.div>
                 </div>
               </div>
@@ -78,12 +86,22 @@ function OrbitRing({ skills, ring, reduceMotion }: { skills: Skill[]; ring: Ring
 
 export default function AiCore({ skills, activeCategory }: AiCoreProps) {
   const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
+  const isMobile = useMediaQuery("(max-width: 639px)")
+
+  const coreSize = isMobile ? CORE_SIZE_MOBILE : CORE_SIZE_DESKTOP
+  const coreScale = coreSize / CORE_SIZE_DESKTOP
+  const rings: [RingConfig, RingConfig] = [
+    { radius: 78 * coreScale, duration: 22 },
+    { radius: 122 * coreScale, duration: 34 },
+  ]
+  const badgeSize = Math.max(28, Math.round(36 * coreScale))
+  const iconSize = Math.max(13, Math.round(16 * coreScale))
 
   const ring1 = skills.filter((_, i) => i % 2 === 0)
   const ring2 = skills.filter((_, i) => i % 2 === 1)
 
   return (
-    <div className="relative select-none" style={{ width: CORE_SIZE, height: CORE_SIZE }}>
+    <div className="relative select-none" style={{ width: coreSize, height: coreSize }}>
       {/* Ambient outer halo */}
       <div
         className="absolute inset-0 rounded-full"
@@ -121,8 +139,8 @@ export default function AiCore({ skills, activeCategory }: AiCoreProps) {
       ))}
 
       {/* Orbit rings of skill icons */}
-      <OrbitRing skills={ring1} ring={RINGS[0]} reduceMotion={reduceMotion} />
-      <OrbitRing skills={ring2} ring={RINGS[1]} reduceMotion={reduceMotion} />
+      <OrbitRing skills={ring1} ring={rings[0]} badgeSize={badgeSize} iconSize={iconSize} reduceMotion={reduceMotion} />
+      <OrbitRing skills={ring2} ring={rings[1]} badgeSize={badgeSize} iconSize={iconSize} reduceMotion={reduceMotion} />
 
       {/* Reaction pulse — one-shot burst whenever the category changes */}
       {!reduceMotion && (

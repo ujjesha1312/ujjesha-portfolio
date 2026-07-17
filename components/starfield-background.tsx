@@ -43,14 +43,20 @@ export default function StarfieldBackground() {
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
+    // Scale particle density down on mobile, and skip motion entirely if the
+    // user prefers reduced motion — this is the heaviest animation on the page
+    // since it runs behind every section for the whole session.
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    const isMobile = window.innerWidth < 640
+
     let animationFrameId: number
     const driftingStars: DriftingStar[] = []
     const shootingStars: ShootingStar[] = [] // Multiple shooting stars
     const stardustParticles: Stardust[] = []
     let nextShootingStarTime = Date.now() + getRandomInterval()
-    const starCount = 150 // Increased density for better visibility
-    const maxShootingStars = 3 // Allow up to 3 shooting stars at once
-    const stardustCount = 80 // More stardust particles
+    const starCount = isMobile ? 70 : 150
+    const maxShootingStars = prefersReducedMotion ? 0 : isMobile ? 1 : 3
+    const stardustCount = prefersReducedMotion ? 0 : isMobile ? 30 : 80
 
     // Set canvas size
     const resizeCanvas = () => {
@@ -287,7 +293,10 @@ export default function StarfieldBackground() {
         }
       }
 
-      animationFrameId = requestAnimationFrame(animate)
+      // With reduced motion, draw one static frame and stop rather than looping forever.
+      if (!prefersReducedMotion) {
+        animationFrameId = requestAnimationFrame(animate)
+      }
     }
 
     animate()

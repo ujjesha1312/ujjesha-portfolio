@@ -45,15 +45,15 @@ export default function SkillsSection() {
 
         <div className="max-w-6xl mx-auto grid lg:grid-cols-[45fr_55fr] gap-10 lg:gap-8 items-start">
           {/* LEFT — AI Core */}
-          <div className="flex items-center justify-center min-h-[320px]">
+          <div className="flex items-center justify-center min-h-[224px] sm:min-h-[320px]">
             <AiCore skills={activeShelf.skills} activeCategory={activeCategory} />
           </div>
 
           {/* RIGHT — category nav (fixed) + skill chips (independent, below) */}
-          <div className="min-h-[320px] flex flex-col">
+          <div className="min-h-[224px] sm:min-h-[320px] flex flex-col">
             {/* Nav always sits at a fixed position — its own height never depends on
                 which category is active or how many chips it renders below. */}
-            <nav className="flex flex-nowrap justify-center gap-x-3 sm:gap-x-6 mb-8">
+            <nav className="flex flex-wrap justify-center gap-x-3 sm:gap-x-6 gap-y-2 mb-8">
               {orderedShelves.map((shelf) => {
                 const isActive = shelf.id === activeCategory
                 return (

@@ -579,7 +579,7 @@ function MissionPanel({
     >
       <button
         onClick={onClose}
-        className="absolute top-6 right-6 p-2 rounded-full bg-black/40 border border-[#6fa8ff]/20 hover:border-[#6fa8ff]/40 transition-colors"
+        className="absolute top-6 right-6 p-3 rounded-full bg-black/40 border border-[#6fa8ff]/20 hover:border-[#6fa8ff]/40 transition-colors"
       >
         <X className="h-4 w-4 text-white" />
       </button>

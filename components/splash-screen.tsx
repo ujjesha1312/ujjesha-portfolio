@@ -133,7 +133,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           transition={{ duration: 1.2, delay: 0.3 }}
           className="text-4xl sm:text-5xl lg:text-6xl font-light text-[#F5F5F5] tracking-tight mb-8"
         >
-          Ujjesha's <span className="italic font-normal">Portfolio</span>
+          Ujjesha&apos;s <span className="italic font-normal">Portfolio</span>
         </motion.h1>
 
         {/* Loading Dots */}

@@ -54,9 +54,9 @@ export default function AboutSection() {
             </div>
 
             {/* Right Column - Bio Content */}
-            <div className="space-y-3 text-[#F5F5F5] leading-relaxed">
+            <div className="max-w-[68ch] space-y-4 text-[#F5F5F5] leading-relaxed">
               <p className="text-sm">
-                I never really planned on becoming an AI engineer. A few years ago, if someone had told me I'd be building AI systems, working on Vision-Language Models, or interning at NRSC–ISRO, I probably wouldn't have believed them.
+                I never really planned on becoming an AI engineer. A few years ago, if someone had told me I&apos;d be building AI systems, working on Vision-Language Models, or interning at NRSC–ISRO, I probably wouldn&apos;t have believed them.
               </p>
 
               <p className="text-sm">
@@ -68,15 +68,15 @@ export default function AboutSection() {
               </p>
 
               <p className="text-sm">
-                Alongside technology, I've spent the last few years actively contributing to my college's innovation ecosystem through E-Cell and as an Innovation Ambassador. Organizing events, working with different teams, and interacting with people from diverse backgrounds taught me that building products isn't just about writing good code—it's equally about communication, collaboration, and understanding the people you're building for.
+                Alongside technology, I&apos;ve spent the last few years actively contributing to my college&apos;s innovation ecosystem through E-Cell and as an Innovation Ambassador. Organizing events, working with different teams, and interacting with people from diverse backgrounds taught me that building products isn&apos;t just about writing good code—it&apos;s equally about communication, collaboration, and understanding the people you&apos;re building for.
               </p>
 
               <p className="text-sm">
-                I'm also someone who enjoys learning beyond the classroom. I like keeping up with new developments in AI and technology, reading about interesting ideas, and learning from the experiences of people around me. Outside of work, dance, music, and art are where I recharge and express my creativity.
+                I&apos;m also someone who enjoys learning beyond the classroom. I like keeping up with new developments in AI and technology, reading about interesting ideas, and learning from the experiences of people around me. Outside of work, dance, music, and art are where I recharge and express my creativity.
               </p>
 
               <p className="text-sm">
-                I still consider myself someone who's learning every day. Every project I build teaches me something new, and that's probably my favorite part of this journey. I genuinely believe that the best products start with curiosity, grow through experimentation, and create real value by solving meaningful problems. That's the mindset I try to bring to everything I build.
+                I still consider myself someone who&apos;s learning every day. Every project I build teaches me something new, and that&apos;s probably my favorite part of this journey. I genuinely believe that the best products start with curiosity, grow through experimentation, and create real value by solving meaningful problems. That&apos;s the mindset I try to bring to everything I build.
               </p>
             </div>
           </div>

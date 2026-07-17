@@ -12,18 +12,22 @@ import ContactSection from "@/components/contact-section"
 import Footer from "@/components/footer"
 import StarfieldBackground from "@/components/starfield-background"
 import SplashScreen from "@/components/splash-screen"
+import MobileNav from "@/components/mobile-nav"
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true)
   const [hasVisited, setHasVisited] = useState(false)
 
   useEffect(() => {
-    // Check if user has already visited (stored in sessionStorage)
-    const visited = sessionStorage.getItem('hasVisited')
-    if (visited) {
-      setShowSplash(false)
-      setHasVisited(true)
-    }
+    // Deferred a frame so this doesn't set state synchronously inside the effect body.
+    const raf = requestAnimationFrame(() => {
+      const visited = sessionStorage.getItem('hasVisited')
+      if (visited) {
+        setShowSplash(false)
+        setHasVisited(true)
+      }
+    })
+    return () => cancelAnimationFrame(raf)
   }, [])
 
   const handleSplashComplete = () => {
@@ -41,6 +45,7 @@ export default function Home() {
       </AnimatePresence>
 
       <StarfieldBackground />
+      <MobileNav />
       <main className="overflow-x-hidden relative bg-black" style={{ zIndex: 10 }}>
         <div id="home">
           <HeroSection />

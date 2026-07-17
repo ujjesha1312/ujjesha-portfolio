@@ -156,8 +156,16 @@ export default function ProjectsSection() {
   const [armedProject, setArmedProject] = useState<number | null>(null)
   const isTouchDevice = useMediaQuery("(hover: none)")
   const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
+  const isMobile = useMediaQuery("(max-width: 639px)")
+  const isTablet = useMediaQuery("(min-width: 640px) and (max-width: 1023px)")
   const [time, setTime] = useState(0)
   const animationRef = useRef<number | undefined>(undefined)
+
+  // The orbit system uses fixed pixel radii tuned for desktop — scale everything
+  // down together on smaller screens so nothing spills past the viewport edge.
+  const orbitScale = isMobile ? 0.4 : isTablet ? 0.75 : 1
+  const planetScale = isMobile ? 0.68 : isTablet ? 0.88 : 1
+  const orbitContainerSize = isMobile ? 280 : isTablet ? 460 : 560
 
   useEffect(() => {
     let lastTime = Date.now()
@@ -202,8 +210,8 @@ export default function ProjectsSection() {
   const getOrbitPosition = (project: Project, currentTime: number) => {
     // Every planet — selected, hovered, or idle — always keeps revolving on its orbit.
     const angle = (currentTime / project.orbitSpeed) * Math.PI * 2
-    const x = Math.cos(angle) * project.orbitRadius
-    const y = Math.sin(angle) * project.orbitRadius
+    const x = Math.cos(angle) * project.orbitRadius * orbitScale
+    const y = Math.sin(angle) * project.orbitRadius * orbitScale
 
     return { x, y }
   }
@@ -228,26 +236,26 @@ export default function ProjectsSection() {
           {/* Main Layout: Orbit System + Detail Panel */}
           <div className="grid lg:grid-cols-[1fr_480px] gap-8 items-center">
             {/* Left: Orbit System */}
-            <div className="relative flex items-center justify-center" style={{ minHeight: "550px" }}>
+            <div
+              className="relative flex items-center justify-center mx-auto aspect-square"
+              style={{ width: orbitContainerSize, maxWidth: "100%" }}
+            >
               {/* Center Label */}
               <div className="absolute z-10 flex items-center justify-center pointer-events-none">
-                <div className="px-6 py-3 bg-[#111111] border border-[#A1A1AA]/30 rounded-full shadow-lg">
-                  <span className="text-xs font-semibold text-[#F5F5F5] tracking-wider uppercase">
+                <div className="px-4 sm:px-6 py-2 sm:py-3 bg-[#111111] border border-[#A1A1AA]/30 rounded-full shadow-lg">
+                  <span className="text-[10px] sm:text-xs font-semibold text-[#F5F5F5] tracking-wider uppercase whitespace-nowrap">
                     Selected Work
                   </span>
                 </div>
               </div>
 
               {/* Orbit Paths (visual guides) */}
-              <svg
-                className="absolute inset-0 w-full h-full pointer-events-none"
-                style={{ maxWidth: "550px", maxHeight: "550px", margin: "auto" }}
-              >
+              <svg className="absolute inset-0 w-full h-full pointer-events-none">
                 {/* Featured orbit (100px) */}
                 <circle
                   cx="50%"
                   cy="50%"
-                  r="100"
+                  r={100 * orbitScale}
                   fill="none"
                   stroke="rgba(245,245,245,1)"
                   strokeWidth="0.8"
@@ -263,13 +271,13 @@ export default function ProjectsSection() {
                 <circle
                   cx="50%"
                   cy="50%"
-                  r="140"
+                  r={140 * orbitScale}
                   fill="none"
                   stroke="rgba(245,245,245,1)"
                   strokeWidth="0.8"
                   className="transition-all duration-500"
                   style={{
-                    opacity: 
+                    opacity:
                       selectedProject && [1, 2].includes(selectedProject.id) ? 0.2 :
                       hoveredProject && [1, 2].includes(hoveredProject) ? 0.18 :
                       selectedProject ? 0.08 : 0.14
@@ -279,13 +287,13 @@ export default function ProjectsSection() {
                 <circle
                   cx="50%"
                   cy="50%"
-                  r="190"
+                  r={190 * orbitScale}
                   fill="none"
                   stroke="rgba(245,245,245,1)"
                   strokeWidth="0.8"
                   className="transition-all duration-500"
                   style={{
-                    opacity: 
+                    opacity:
                       selectedProject && [3, 4].includes(selectedProject.id) ? 0.2 :
                       hoveredProject && [3, 4].includes(hoveredProject) ? 0.18 :
                       selectedProject ? 0.08 : 0.14
@@ -295,13 +303,13 @@ export default function ProjectsSection() {
                 <circle
                   cx="50%"
                   cy="50%"
-                  r="240"
+                  r={240 * orbitScale}
                   fill="none"
                   stroke="rgba(245,245,245,1)"
                   strokeWidth="0.8"
                   className="transition-all duration-500"
                   style={{
-                    opacity: 
+                    opacity:
                       selectedProject && [5, 6, 7].includes(selectedProject.id) ? 0.2 :
                       hoveredProject && [5, 6, 7].includes(hoveredProject) ? 0.18 :
                       selectedProject ? 0.08 : 0.14
@@ -318,7 +326,8 @@ export default function ProjectsSection() {
                     ? armedProject === project.id
                     : hoveredProject === project.id
                   const isDimmed = selectedProject && !isSelected
-                  const nodeSize = isSelected ? 76 : isHovered ? 56 : isDimmed ? 50 : project.featured ? 64 : 50
+                  const baseNodeSize = isSelected ? 76 : isHovered ? 56 : isDimmed ? 50 : project.featured ? 64 : 50
+                  const nodeSize = Math.round(baseNodeSize * planetScale)
                   const bobDuration = 4 + (project.id % 3)
                   const bobDelay = (project.id % 4) * 0.35
 

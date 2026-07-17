@@ -57,13 +57,13 @@ export default function ContactSection() {
               Get In Touch
             </h2>
             <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 text-[#F5F5F5]">
-              Let's{" "}
+              Let&apos;s{" "}
               <span className="text-[#F5F5F5]">
                 Work Together
               </span>
             </h3>
             <p className="text-lg text-[#A1A1AA] max-w-2xl mx-auto">
-              Have a project in mind or want to discuss opportunities? I'd love to hear from you!
+              Have a project in mind or want to discuss opportunities? I&apos;d love to hear from you!
             </p>
           </div>
 
@@ -207,7 +207,7 @@ export default function ContactSection() {
                       handleCloseModal()
                     }}
                     disabled={isSubmitting}
-                    className="absolute top-6 right-6 p-2 rounded-full bg-[#0A0A0A] border border-[#A1A1AA]/20 hover:border-[#A1A1AA]/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="absolute top-6 right-6 p-3 rounded-full bg-[#0A0A0A] border border-[#A1A1AA]/20 hover:border-[#A1A1AA]/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Close modal"
                   >
                     <X className="h-5 w-5 text-[#F5F5F5]" />
@@ -222,10 +222,10 @@ export default function ContactSection() {
                         </div>
                       </div>
                       <h4 className="text-2xl font-bold mb-3 text-[#F5F5F5]">
-                        Let's stay connected
+                        Let&apos;s stay connected
                       </h4>
                       <p className="text-lg text-[#A1A1AA] max-w-md mx-auto">
-                        Thank you for reaching out. I'll get back to you soon!
+                        Thank you for reaching out. I&apos;ll get back to you soon!
                       </p>
                     </div>
                   ) : (
