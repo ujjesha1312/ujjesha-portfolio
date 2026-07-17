@@ -39,18 +39,9 @@ export interface Skill {
   usedEverywhere?: boolean
 }
 
-export interface ShelfAccent {
-  spineFrom: string
-  spineTo: string
-  rim: string
-  foil: string
-  tone: "white" | "blue"
-}
-
 export interface Shelf {
   id: string
   title: string
-  accent: ShelfAccent
   skills: Skill[]
 }
 
@@ -74,14 +65,6 @@ export const shelves: Shelf[] = [
   {
     id: "programming",
     title: "Programming",
-    accent: {
-      // Midnight Blue
-      spineFrom: "#22345c",
-      spineTo: "#050810",
-      rim: "rgba(90, 145, 225, 0.45)",
-      foil: "#e8edf6",
-      tone: "blue",
-    },
     skills: [
       {
         name: "Python",
@@ -154,14 +137,6 @@ export const shelves: Shelf[] = [
   {
     id: "core-cs",
     title: "Core CS",
-    accent: {
-      // Pearl White
-      spineFrom: "#f5f3ef",
-      spineTo: "#cacdd7",
-      rim: "rgba(160, 190, 230, 0.4)",
-      foil: "#1c2540",
-      tone: "white",
-    },
     skills: [
       {
         name: "Data Structures & Algorithms",
@@ -248,15 +223,7 @@ export const shelves: Shelf[] = [
   },
   {
     id: "ai-ml",
-    title: "AI / ML",
-    accent: {
-      // Deep Space Blue
-      spineFrom: "#141b33",
-      spineTo: "#020308",
-      rim: "rgba(110, 155, 255, 0.5)",
-      foil: "#eef2f9",
-      tone: "blue",
-    },
+    title: "AI Engineering",
     skills: [
       {
         name: "Machine Learning",
@@ -455,14 +422,6 @@ export const shelves: Shelf[] = [
   {
     id: "frameworks",
     title: "Frameworks",
-    accent: {
-      // Sapphire Blue
-      spineFrom: "#28579e",
-      spineTo: "#0a1a34",
-      rim: "rgba(110, 170, 255, 0.45)",
-      foil: "#f1f5fb",
-      tone: "blue",
-    },
     skills: [
       {
         name: "FastAPI",
@@ -548,15 +507,7 @@ export const shelves: Shelf[] = [
   },
   {
     id: "tools",
-    title: "Dev Tools",
-    accent: {
-      // Ice White
-      spineFrom: "#e8eff7",
-      spineTo: "#b8c4d7",
-      rim: "rgba(140, 180, 230, 0.4)",
-      foil: "#161f38",
-      tone: "white",
-    },
+    title: "Developer Tools",
     skills: [
       {
         name: "VS Code",
