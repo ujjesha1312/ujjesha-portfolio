@@ -15,52 +15,50 @@ export default function SkillsSection() {
 
   const activeShelf = orderedShelves.find((s) => s.id === activeCategory) ?? orderedShelves[0]
 
-  const gridVariants: Variants = {
+  const listVariants: Variants = {
     hidden: {},
     visible: { transition: { staggerChildren: reduceMotion ? 0 : 0.06 } },
     exit: { transition: { staggerChildren: 0.02, staggerDirection: -1 } },
   }
 
-  const tileVariants: Variants = reduceMotion
+  const chipVariants: Variants = reduceMotion
     ? {
         hidden: { opacity: 0 },
         visible: { opacity: 1, transition: { duration: 0.2 } },
         exit: { opacity: 0, transition: { duration: 0.15 } },
       }
     : {
-        hidden: { y: -260 },
+        hidden: { y: -220 },
         visible: { y: 0, transition: { type: "spring", stiffness: 300, damping: 15, mass: 0.8 } },
         exit: { opacity: 0, y: 10, transition: { duration: 0.2 } },
       }
 
   return (
-    <section id="skills" className="py-20 sm:py-32 relative overflow-hidden">
+    <section id="skills" className="py-12 sm:py-16 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <h2 className="text-base font-semibold text-white tracking-widest uppercase">
-            Skills and Expertise
+            Skills &amp; Expertise
           </h2>
-          <p className="text-white/50 text-sm mt-2">
-            Systems I&apos;ve learned to build, understand and scale.
-          </p>
+          <p className="text-white/50 text-sm mt-2">Click a category to explore skills.</p>
         </div>
 
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-[2fr_3fr] gap-10 lg:gap-16">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[45fr_55fr] gap-10 lg:gap-8 items-center">
           {/* LEFT — AI Core */}
-          <div className="lg:sticky lg:top-24 lg:self-start flex items-center justify-center">
-            <AiCore />
+          <div className="flex items-center justify-center">
+            <AiCore skills={activeShelf.skills} activeCategory={activeCategory} />
           </div>
 
-          {/* RIGHT — category nav + skill grid */}
-          <div>
-            <nav className="flex flex-wrap gap-x-8 gap-y-3 mb-10">
+          {/* RIGHT — category nav + skill chips */}
+          <div className="min-h-[320px] flex flex-col justify-center">
+            <nav className="flex flex-wrap gap-x-5 gap-y-2 mb-8">
               {orderedShelves.map((shelf) => {
                 const isActive = shelf.id === activeCategory
                 return (
                   <button
                     key={shelf.id}
                     onClick={() => setActiveCategory(shelf.id)}
-                    className={`relative pb-2 text-sm font-medium tracking-wide transition-colors duration-300 ${
+                    className={`relative whitespace-nowrap pb-2 text-xs sm:text-sm font-medium tracking-wide transition-colors duration-300 ${
                       isActive ? "text-white" : "text-white/40 hover:text-white/70"
                     }`}
                   >
@@ -81,26 +79,26 @@ export default function SkillsSection() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeShelf.id}
-                variants={gridVariants}
+                variants={listVariants}
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"
+                className="flex flex-wrap gap-3"
               >
                 {activeShelf.skills.map((skill) => (
                   <motion.div
                     key={skill.name}
-                    variants={tileVariants}
-                    whileHover={reduceMotion ? undefined : { y: -4 }}
+                    variants={chipVariants}
+                    whileHover={reduceMotion ? undefined : { y: -3 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="group relative flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-md transition-colors duration-300 hover:border-[#6fa8ff]/50 hover:bg-white/[0.06] cursor-default"
+                    className="group relative inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 backdrop-blur-md transition-colors duration-300 hover:border-[#6fa8ff]/50 hover:bg-white/[0.08] cursor-default"
                   >
                     <div
-                      className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                      style={{ boxShadow: "0 0 20px rgba(111,168,255,0.3)" }}
+                      className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                      style={{ boxShadow: "0 0 16px rgba(111,168,255,0.3)" }}
                     />
-                    <skill.icon className="relative w-5 h-5 text-[#8fb4f5]" />
-                    <span className="relative text-xs sm:text-sm font-medium text-white text-center leading-snug">
+                    <skill.icon className="relative w-4 h-4 text-[#8fb4f5] shrink-0" />
+                    <span className="relative text-sm font-medium text-white whitespace-nowrap">
                       {skill.name}
                     </span>
                   </motion.div>

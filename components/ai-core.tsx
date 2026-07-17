@@ -1,50 +1,107 @@
 "use client"
 
+import { motion, AnimatePresence } from "framer-motion"
+import type { Skill } from "@/lib/skills-data"
 import { useMediaQuery } from "@/lib/use-media-query"
 
+interface AiCoreProps {
+  skills: Skill[]
+  activeCategory: string
+}
+
+const CORE_SIZE = 320
+
 const STARS = [
-  { x: 12, y: 18, size: 1.4, delay: 0 },
-  { x: 82, y: 14, size: 1.1, delay: 0.6 },
-  { x: 90, y: 42, size: 1.6, delay: 1.4 },
-  { x: 78, y: 78, size: 1.2, delay: 0.3 },
-  { x: 20, y: 84, size: 1.4, delay: 1.9 },
-  { x: 8, y: 55, size: 1, delay: 2.6 },
-  { x: 50, y: 6, size: 1.3, delay: 1.1 },
-  { x: 60, y: 92, size: 1, delay: 2.2 },
-  { x: 30, y: 10, size: 1.1, delay: 0.9 },
-  { x: 92, y: 88, size: 1.3, delay: 1.6 },
+  { x: 10, y: 16, size: 1.3, delay: 0 },
+  { x: 88, y: 12, size: 1, delay: 0.6 },
+  { x: 92, y: 44, size: 1.5, delay: 1.4 },
+  { x: 80, y: 82, size: 1.1, delay: 0.3 },
+  { x: 16, y: 86, size: 1.3, delay: 1.9 },
+  { x: 6, y: 52, size: 1, delay: 2.6 },
+  { x: 48, y: 4, size: 1.2, delay: 1.1 },
 ]
 
-const PARTICLES = [
-  { radius: 46, size: 3, duration: 14, delay: 0, reverse: false },
-  { radius: 60, size: 2, duration: 20, delay: 2, reverse: true },
-  { radius: 72, size: 2.5, duration: 26, delay: 4, reverse: false },
-  { radius: 84, size: 2, duration: 32, delay: 1, reverse: true },
+interface RingConfig {
+  radius: number
+  duration: number
+}
+
+const RINGS: [RingConfig, RingConfig] = [
+  { radius: 78, duration: 22 },
+  { radius: 122, duration: 34 },
 ]
 
-export default function AiCore() {
-  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
+function OrbitRing({ skills, ring, reduceMotion }: { skills: Skill[]; ring: RingConfig; reduceMotion: boolean }) {
+  if (skills.length === 0) return null
 
   return (
-    <div className="relative w-full max-w-[380px] aspect-square mx-auto select-none pointer-events-none">
+    // Ring: continuously rotates. Everything inside sweeps around with it.
+    <div
+      className="absolute inset-0"
+      style={{ animation: reduceMotion ? "none" : `orbit-ring-spin ${ring.duration}s linear infinite` }}
+    >
+      <AnimatePresence>
+        {skills.map((skill, i) => {
+          const angle = (i / skills.length) * 360
+          const SkillIcon = skill.icon
+          return (
+            // Angle slot: static rotation, points this icon's "arm" in its assigned direction.
+            <div key={skill.name} className="absolute inset-0" style={{ transform: `rotate(${angle}deg)` }}>
+              {/* Radius offset: static, pushes the icon out along the arm. */}
+              <div
+                className="absolute left-1/2 top-1/2"
+                style={{ transform: `translate(-50%, -50%) translateY(-${ring.radius}px)` }}
+              >
+                {/* Counter-rotation: cancels the ring's spin so the icon itself stays upright. */}
+                <div
+                  style={{ animation: reduceMotion ? "none" : `orbit-ring-spin-reverse ${ring.duration}s linear infinite` }}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.3 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.3 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                    className="w-9 h-9 rounded-full bg-black/70 border border-[#6fa8ff]/40 backdrop-blur-sm flex items-center justify-center"
+                    style={{ boxShadow: "0 0 12px rgba(111,168,255,0.35)" }}
+                  >
+                    <SkillIcon className="w-4 h-4 text-[#a8c0ff]" />
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+export default function AiCore({ skills, activeCategory }: AiCoreProps) {
+  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
+
+  const ring1 = skills.filter((_, i) => i % 2 === 0)
+  const ring2 = skills.filter((_, i) => i % 2 === 1)
+
+  return (
+    <div className="relative select-none" style={{ width: CORE_SIZE, height: CORE_SIZE }}>
       {/* Ambient outer halo */}
       <div
         className="absolute inset-0 rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(99,102,241,0.18) 0%, rgba(99,102,241,0.06) 45%, transparent 70%)",
-          filter: "blur(24px)",
+          background: "radial-gradient(circle, rgba(110,130,255,0.16) 0%, rgba(120,90,240,0.08) 45%, transparent 70%)",
+          filter: "blur(20px)",
           animation: reduceMotion ? "none" : "core-breathe 7s ease-in-out infinite",
         }}
       />
 
       {/* Nebula dust */}
       <div
-        className="absolute w-[55%] h-[55%] rounded-full bg-[#5b6fe0]/10 blur-3xl"
-        style={{ top: "5%", left: "0%", animation: reduceMotion ? "none" : "nebula-a 26s ease-in-out infinite" }}
+        className="absolute w-[50%] h-[50%] rounded-full bg-[#5b6fe0]/10 blur-3xl"
+        style={{ top: "6%", left: "2%", animation: reduceMotion ? "none" : "nebula-a 26s ease-in-out infinite" }}
       />
       <div
-        className="absolute w-[45%] h-[45%] rounded-full bg-[#8b5fd8]/10 blur-3xl"
-        style={{ bottom: "5%", right: "0%", animation: reduceMotion ? "none" : "nebula-b 32s ease-in-out infinite" }}
+        className="absolute w-[40%] h-[40%] rounded-full bg-[#8b5fd8]/10 blur-3xl"
+        style={{ bottom: "6%", right: "2%", animation: reduceMotion ? "none" : "nebula-b 32s ease-in-out infinite" }}
       />
 
       {/* Tiny sparkling stars */}
@@ -63,115 +120,85 @@ export default function AiCore() {
         />
       ))}
 
-      {/* Occasional tiny asteroid passing through */}
+      {/* Orbit rings of skill icons */}
+      <OrbitRing skills={ring1} ring={RINGS[0]} reduceMotion={reduceMotion} />
+      <OrbitRing skills={ring2} ring={RINGS[1]} reduceMotion={reduceMotion} />
+
+      {/* Reaction pulse — one-shot burst whenever the category changes */}
       {!reduceMotion && (
-        <div
-          className="absolute w-[3px] h-[3px] rounded-full bg-[#a8b4d8]"
-          style={{ top: "30%", left: "-4%", animation: "asteroid-pass 24s linear infinite" }}
+        <motion.div
+          key={activeCategory}
+          className="absolute inset-[30%] rounded-full pointer-events-none"
+          style={{ border: "1px solid rgba(140,175,255,0.7)" }}
+          initial={{ scale: 0.6, opacity: 0.8 }}
+          animate={{ scale: 1.9, opacity: 0 }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
         />
       )}
 
-      {/* Gravitational distortion rings */}
+      {/* Glowing energy core */}
       <div
-        className="absolute inset-[8%] rounded-full border border-[#6f8fe0]/15"
-        style={{ animation: reduceMotion ? "none" : "ring-pulse 6s ease-in-out infinite" }}
-      />
-      <div
-        className="absolute inset-[16%] rounded-full border border-[#8b6fe0]/15"
-        style={{ animation: reduceMotion ? "none" : "ring-pulse 6s ease-in-out infinite 2s" }}
-      />
-
-      {/* Orbiting glowing particles */}
-      {PARTICLES.map((p, i) => (
+        className="absolute inset-[32%] rounded-full overflow-hidden"
+        style={{ animation: reduceMotion ? "none" : "core-breathe 7s ease-in-out infinite 0.3s" }}
+      >
         <div
-          key={i}
           className="absolute inset-0"
           style={{
-            animation: reduceMotion
-              ? "none"
-              : `${p.reverse ? "orbit-spin-reverse" : "orbit-spin"} ${p.duration}s linear infinite`,
-            animationDelay: `${p.delay}s`,
+            background:
+              "radial-gradient(circle at 38% 32%, #d8e2ff 0%, #8fa8f5 30%, #5b6fd8 55%, #2a2f6e 80%, #14163a 100%)",
           }}
-        >
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: p.size,
-              height: p.size,
-              left: "50%",
-              top: "50%",
-              transform: `translate(-50%, -50%) translateY(-${p.radius}%)`,
-              background: "#a8c0ff",
-              boxShadow: "0 0 6px rgba(168,192,255,0.9)",
-            }}
+        />
+        <div
+          className="absolute inset-[-40%]"
+          style={{
+            background:
+              "conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,0.35) 15%, transparent 30%, rgba(160,140,255,0.3) 55%, transparent 72%, rgba(255,255,255,0.2) 90%, transparent 100%)",
+            animation: reduceMotion ? "none" : "core-inner-spin 14s linear infinite",
+          }}
+        />
+        {!reduceMotion && (
+          <motion.div
+            key={`flash-${activeCategory}`}
+            className="absolute inset-0 bg-white"
+            initial={{ opacity: 0.5 }}
+            animate={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           />
-        </div>
-      ))}
-
-      {/* Accretion ring */}
+        )}
+      </div>
       <div
-        className="absolute inset-[22%] rounded-full"
-        style={{
-          animation: reduceMotion ? "none" : "ring-rotate 24s linear infinite",
-          background:
-            "conic-gradient(from 0deg, transparent 0%, rgba(99,140,255,0.55) 20%, transparent 35%, rgba(160,110,255,0.55) 60%, transparent 78%, rgba(99,140,255,0.4) 95%, transparent 100%)",
-          filter: "blur(3px)",
-        }}
-      />
-      <div
-        className="absolute inset-[22%] rounded-full"
-        style={{
-          boxShadow: "0 0 40px rgba(110,140,255,0.35), 0 0 80px rgba(140,100,255,0.2)",
-        }}
-      />
-
-      {/* Event horizon — hollow black center */}
-      <div
-        className="absolute inset-[30%] rounded-full"
-        style={{
-          background: "radial-gradient(circle at 40% 35%, #0a0a0f 0%, #000000 65%, #000000 100%)",
-          boxShadow: "inset 0 0 30px rgba(0,0,0,0.9), 0 0 24px rgba(0,0,0,0.6)",
-        }}
+        className="absolute inset-[32%] rounded-full pointer-events-none"
+        style={{ boxShadow: "0 0 30px rgba(150,170,255,0.55), 0 0 60px rgba(140,110,255,0.3)" }}
       />
 
       <style jsx>{`
         @keyframes core-breathe {
           0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.05); opacity: 0.85; }
+          50% { transform: scale(1.05); opacity: 0.9; }
+        }
+        @keyframes core-inner-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         @keyframes nebula-a {
           0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(18px, 12px); }
+          50% { transform: translate(16px, 10px); }
         }
         @keyframes nebula-b {
           0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(-14px, -10px); }
+          50% { transform: translate(-12px, -8px); }
         }
         @keyframes star-twinkle {
           0%, 100% { opacity: 0.2; }
           50% { opacity: 0.9; }
         }
-        @keyframes ring-pulse {
-          0%, 100% { transform: scale(1); opacity: 0.5; }
-          50% { transform: scale(1.04); opacity: 0.15; }
-        }
-        @keyframes ring-rotate {
+        @keyframes orbit-ring-spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-        @keyframes orbit-spin {
+        @keyframes orbit-ring-spin-reverse {
           from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes orbit-spin-reverse {
-          from { transform: rotate(360deg); }
-          to { transform: rotate(0deg); }
-        }
-        @keyframes asteroid-pass {
-          0%, 82% { opacity: 0; transform: translate(0, 0); }
-          85% { opacity: 0.8; }
-          94% { opacity: 0.8; transform: translate(340px, 60px); }
-          96%, 100% { opacity: 0; transform: translate(360px, 64px); }
+          to { transform: rotate(-360deg); }
         }
       `}</style>
     </div>
