@@ -141,7 +141,9 @@ export default function MissionCraft({
       onClick={onClick}
       onMouseEnter={onHoverStart}
       onMouseLeave={onHoverEnd}
-      className="relative outline-none"
+      onFocus={onHoverStart}
+      onBlur={onHoverEnd}
+      className="relative rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#6fa8ff]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
       style={{ width: 64, height: 64, perspective: 400 }}
       animate={{
         opacity: isDimmed ? 0.35 : 1,

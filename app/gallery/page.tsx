@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
@@ -51,7 +51,7 @@ function MediaCard({ item, index }: { item: MediaItem; index: number }) {
       {item.type === 'image' ? (
         <img
           src={item.src}
-          alt=""
+          alt={`Personal photo ${index + 1} of ${mediaItems.length} from Ujjesha's gallery`}
           className="w-full h-full object-cover transition-all duration-700 ease-out"
           style={{
             filter: isHovered ? 'saturate(1.1) brightness(1.05)' : 'saturate(0.8) brightness(0.9)',
@@ -61,6 +61,7 @@ function MediaCard({ item, index }: { item: MediaItem; index: number }) {
       ) : (
         <video
           autoPlay
+          aria-label={`Personal video ${index + 1} of ${mediaItems.length} from Ujjesha's gallery`}
           className="w-full h-full object-cover transition-all duration-700 ease-out"
           muted
           loop

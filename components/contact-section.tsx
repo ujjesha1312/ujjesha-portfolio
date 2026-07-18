@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Mail, Phone, MapPin, Send, Github, Linkedin, Twitter, X } from "lucide-react"
+import { Mail, Phone, MapPin, Send, Github, Linkedin, X } from "lucide-react"
 import { useState } from "react"
 
 export default function ContactSection() {

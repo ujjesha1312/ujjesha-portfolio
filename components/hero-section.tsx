@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Github, Linkedin, Mail, ArrowRight, Download } from "lucide-react"
+import { Github, Linkedin, Mail, ArrowRight } from "lucide-react"
 
 export default function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [shimmerComplete, setShimmerComplete] = useState(false)
   const [breathingPhase, setBreathingPhase] = useState(0)
-  const [hoveredLetterIndex, setHoveredLetterIndex] = useState<number | null>(null)
   const [letterWaveStates, setLetterWaveStates] = useState<number[]>([0, 0, 0, 0, 0, 0, 0])
   const waveTimersRef = useRef<NodeJS.Timeout[]>([])
   const nameContainerRef = useRef<HTMLHeadingElement>(null)
@@ -46,15 +45,10 @@ export default function HeroSection() {
   }, [])
 
   const handleLetterHover = (index: number) => {
-    setHoveredLetterIndex(index)
-    
     // Clear existing timers
     waveTimersRef.current.forEach(timer => clearTimeout(timer))
     waveTimersRef.current = []
-    
-    // Calculate wave propagation
-    const newWaveStates = [0, 0, 0, 0, 0, 0, 0]
-    
+
     nameLetters.forEach((_, i) => {
       const distance = Math.abs(i - index)
       const delay = distance * 50 // 50ms per letter distance - slightly slower wave
@@ -86,8 +80,6 @@ export default function HeroSection() {
   }
 
   const handleNameMouseLeave = () => {
-    setHoveredLetterIndex(null)
-    
     // Clear all timers
     waveTimersRef.current.forEach(timer => clearTimeout(timer))
     waveTimersRef.current = []
@@ -326,6 +318,7 @@ export default function HeroSection() {
                   href="https://github.com/ujjesha1312"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="GitHub"
                   className="p-2.5 text-zinc-500 hover:text-white transition-colors border border-zinc-800 hover:border-zinc-600 rounded-lg"
                 >
                   <Github className="h-5 w-5" />
@@ -334,12 +327,14 @@ export default function HeroSection() {
                   href="https://www.linkedin.com/in/ujjesha-nitya-routhu-5a4938312/?originalSubdomain=in"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="LinkedIn"
                   className="p-2.5 text-zinc-500 hover:text-white transition-colors border border-zinc-800 hover:border-zinc-600 rounded-lg"
                 >
                   <Linkedin className="h-5 w-5" />
                 </a>
                 <a
-                  href="mailto:hello@ujjesha.com"
+                  href="mailto:nityarouthu13@gmail.com"
+                  aria-label="Email"
                   className="p-2.5 text-zinc-500 hover:text-white transition-colors border border-zinc-800 hover:border-zinc-600 rounded-lg"
                 >
                   <Mail className="h-5 w-5" />

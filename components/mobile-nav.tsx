@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { useMediaQuery } from "@/lib/use-media-query"
@@ -17,12 +17,26 @@ const navItems = [
 export default function MobileNav() {
   const [isOpen, setIsOpen] = useState(false)
   const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : ""
     return () => {
       document.body.style.overflow = ""
     }
+  }, [isOpen])
+
+  // Escape closes the drawer, and focus moves to it on open — standard dialog behavior.
+  useEffect(() => {
+    if (!isOpen) return
+
+    closeButtonRef.current?.focus()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false)
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isOpen])
 
   const handleNavigate = (id: string) => {
@@ -42,7 +56,7 @@ export default function MobileNav() {
       {/* Fixed trigger — always reachable regardless of scroll position */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed top-6 right-4 z-40 flex items-center justify-center w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white active:scale-95 transition-transform"
+        className="fixed top-6 right-4 z-40 flex items-center justify-center w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white active:scale-95 transition-transform outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5" />
@@ -66,12 +80,16 @@ export default function MobileNav() {
               exit={reduceMotion ? { opacity: 0 } : { x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 32 }}
               className="fixed top-0 right-0 bottom-0 z-50 w-[78%] max-w-[320px] bg-[#050608]/95 backdrop-blur-xl border-l border-white/10 flex flex-col"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site navigation"
             >
               <div className="flex items-center justify-between px-6 pt-6 pb-4">
                 <span className="text-lg font-bold text-white tracking-tight">UJJESHA</span>
                 <button
+                  ref={closeButtonRef}
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white active:scale-95 transition-transform"
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white active:scale-95 transition-transform outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                   aria-label="Close menu"
                 >
                   <X className="h-5 w-5" />
@@ -86,7 +104,7 @@ export default function MobileNav() {
                     animate={reduceMotion ? undefined : { opacity: 1, x: 0 }}
                     transition={{ delay: 0.05 + i * 0.04, duration: 0.3 }}
                     onClick={() => handleNavigate(item.id)}
-                    className="text-left py-4 text-2xl font-medium text-white/80 hover:text-white active:text-white transition-colors border-b border-white/5"
+                    className="text-left py-4 text-2xl font-medium text-white/80 hover:text-white active:text-white transition-colors border-b border-white/5 outline-none focus-visible:ring-2 focus-visible:ring-white/70 rounded"
                   >
                     {item.label}
                   </motion.button>
@@ -96,7 +114,7 @@ export default function MobileNav() {
                   animate={reduceMotion ? undefined : { opacity: 1, x: 0 }}
                   transition={{ delay: 0.05 + navItems.length * 0.04, duration: 0.3 }}
                   onClick={handleGallery}
-                  className="text-left py-4 text-2xl font-medium text-white/80 hover:text-white active:text-white transition-colors"
+                  className="text-left py-4 text-2xl font-medium text-white/80 hover:text-white active:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white/70 rounded"
                 >
                   Gallery
                 </motion.button>

@@ -60,7 +60,7 @@ export default function SkillsSection() {
                   <button
                     key={shelf.id}
                     onClick={() => setActiveCategory(shelf.id)}
-                    className="relative shrink-0 pb-2.5"
+                    className="relative shrink-0 pb-2.5 rounded outline-none focus-visible:ring-2 focus-visible:ring-[#6fa8ff]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   >
                     {/* Invisible ghost reserves the tab's width at its widest (bold) state,
                         so switching active/inactive never resizes the button or shifts neighbors. */}

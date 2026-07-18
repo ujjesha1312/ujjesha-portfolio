@@ -15,11 +15,6 @@ import {
   ScanEye,
   Blend,
   Link2,
-  Target,
-  Hexagon,
-  Landmark,
-  Plane,
-  Building2,
 } from "lucide-react"
 import { SiPython, SiC, SiNumpy, SiPandas, SiScikitlearn, SiGithub, SiJupyter, SiFigma, SiHuggingface, SiFastapi } from "react-icons/si"
 import { FaJava, FaCode, FaAppStore } from "react-icons/fa"
@@ -43,22 +38,6 @@ export interface Shelf {
   id: string
   title: string
   skills: Skill[]
-}
-
-export interface ProjectMeta {
-  icon: IconType
-  blurb: string
-}
-
-export const projectMeta: Record<string, ProjectMeta> = {
-  DisasterVision: { icon: Target, blurb: "AI-powered disaster analysis using VLMs" },
-  "NanoRAG Assistant": { icon: Hexagon, blurb: "Lightweight RAG assistant for Q&A" },
-  "Banking Data Assistant": { icon: Landmark, blurb: "AI assistant for banking data insights" },
-  "MemOrg AI": { icon: Boxes, blurb: "Centralized knowledge management platform" },
-  "Multimodal Airline Agent": { icon: Plane, blurb: "Multimodal AI assistant for airline queries" },
-  "FlightAI Assistant": { icon: Plane, blurb: "Conversational airline customer assistant" },
-  "Marketing Brochure AI": { icon: Building2, blurb: "Website-to-brochure generator using GPT-4" },
-  "Xpert-Chroma": { icon: Sparkles, blurb: "Agentic RAG built on ChromaDB" },
 }
 
 export const shelves: Shelf[] = [

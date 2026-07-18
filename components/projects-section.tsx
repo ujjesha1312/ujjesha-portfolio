@@ -160,12 +160,27 @@ export default function ProjectsSection() {
   const isTablet = useMediaQuery("(min-width: 640px) and (max-width: 1023px)")
   const [time, setTime] = useState(0)
   const animationRef = useRef<number | undefined>(undefined)
+  const sectionRef = useRef<HTMLElement>(null)
+  const isInViewRef = useRef(true)
 
   // The orbit system uses fixed pixel radii tuned for desktop — scale everything
   // down together on smaller screens so nothing spills past the viewport edge.
   const orbitScale = isMobile ? 0.4 : isTablet ? 0.75 : 1
   const planetScale = isMobile ? 0.68 : isTablet ? 0.88 : 1
   const orbitContainerSize = isMobile ? 280 : isTablet ? 460 : 560
+
+  // Skip the (otherwise constant, 60fps) re-render this drives once the section
+  // scrolls out of view — the rAF loop itself keeps ticking cheaply so the orbit
+  // resumes instantly and in sync the moment it's back on screen.
+  useEffect(() => {
+    const node = sectionRef.current
+    if (!node) return
+    const observer = new IntersectionObserver(([entry]) => {
+      isInViewRef.current = entry.isIntersecting
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     let lastTime = Date.now()
@@ -176,7 +191,11 @@ export default function ProjectsSection() {
       lastTime = currentTime
 
       // The orbit never stops — it keeps revolving whether or not a project is selected.
-      setTime((prev) => prev + deltaTime)
+      // But skip the render while scrolled off-screen; the orbit just resumes from
+      // where it left off once visible again, with no visible jump.
+      if (isInViewRef.current) {
+        setTime((prev) => prev + deltaTime)
+      }
 
       animationRef.current = requestAnimationFrame(animate)
     }
@@ -217,7 +236,7 @@ export default function ProjectsSection() {
   }
 
   return (
-    <section id="projects" className="py-20 sm:py-32 relative overflow-hidden">
+    <section ref={sectionRef} id="projects" className="py-20 sm:py-32 relative overflow-hidden">
       {/* Subtle background decoration */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
@@ -354,7 +373,7 @@ export default function ProjectsSection() {
                         }}
                       >
                         <motion.button
-                          className="relative flex items-center justify-center rounded-full transition-all duration-500 ease-out"
+                          className="relative flex items-center justify-center rounded-full transition-all duration-500 ease-out outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                           style={{
                             width: nodeSize,
                             height: nodeSize,
@@ -363,6 +382,8 @@ export default function ProjectsSection() {
                           onClick={() => handlePlanetInteract(project)}
                           onMouseEnter={() => !isTouchDevice && setHoveredProject(project.id)}
                           onMouseLeave={() => !isTouchDevice && setHoveredProject(null)}
+                          onFocus={() => !isTouchDevice && setHoveredProject(project.id)}
+                          onBlur={() => !isTouchDevice && setHoveredProject(null)}
                           whileHover={{ scale: isSelected ? 1 : 1.06 }}
                           transition={{ duration: 0.3, ease: "easeOut" }}
                           aria-label={`View ${project.title}`}

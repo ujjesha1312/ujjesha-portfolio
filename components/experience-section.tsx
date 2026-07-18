@@ -68,6 +68,19 @@ export default function ExperienceSection() {
   const lastShootingStarTime = useRef<number>(0)
   const lastConstellationTime = useRef<number>(0)
   const lastAsteroidTime = useRef<number>(0)
+  const isInViewRef = useRef(true)
+
+  // Skip the canvas redraw entirely once this section scrolls off-screen —
+  // no point re-drawing 90+ stars a frame for a canvas nobody can see.
+  useEffect(() => {
+    const node = containerRef.current
+    if (!node) return
+    const observer = new IntersectionObserver(([entry]) => {
+      isInViewRef.current = entry.isIntersecting
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
 
   // Track cursor position (used for the subtle "lean toward cursor" hover tilt)
   useEffect(() => {
@@ -155,6 +168,11 @@ export default function ExperienceSection() {
     if (!ctx) return
 
     const animate = (time: number) => {
+      if (!isInViewRef.current) {
+        animationRef.current = requestAnimationFrame(animate)
+        return
+      }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       const shouldAnimate = !selectedMission && !reduceMotion
 
