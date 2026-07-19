@@ -1,10 +1,14 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Github, Linkedin, Mail, ArrowRight } from "lucide-react"
+import { useMediaQuery } from "@/lib/use-media-query"
 
 export default function HeroSection() {
+  const router = useRouter()
+  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
   const [isVisible, setIsVisible] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [shimmerComplete, setShimmerComplete] = useState(false)
@@ -12,6 +16,20 @@ export default function HeroSection() {
   const [letterWaveStates, setLetterWaveStates] = useState<number[]>([0, 0, 0, 0, 0, 0, 0])
   const waveTimersRef = useRef<NodeJS.Timeout[]>([])
   const nameContainerRef = useRef<HTMLHeadingElement>(null)
+  const sectionRef = useRef<HTMLElement>(null)
+  const isInViewRef = useRef(true)
+
+  // Skip mousemove/breathing state updates once this section scrolls off-screen —
+  // both would otherwise keep re-rendering an invisible section for the rest of the session.
+  useEffect(() => {
+    const node = sectionRef.current
+    if (!node) return
+    const observer = new IntersectionObserver(([entry]) => {
+      isInViewRef.current = entry.isIntersecting
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     // Deferred a frame so this doesn't set state synchronously inside the effect body.
@@ -21,13 +39,15 @@ export default function HeroSection() {
     const shimmerTimer = setTimeout(() => {
       setShimmerComplete(true)
     }, 3000)
-    
+
     // Breathing animation after reveal
     const breathingInterval = setInterval(() => {
+      if (!isInViewRef.current || reduceMotion) return
       setBreathingPhase(prev => prev + 0.01)
     }, 50)
-    
+
     const handleMouseMove = (e: MouseEvent) => {
+      if (!isInViewRef.current || reduceMotion) return
       setMousePosition({
         x: (e.clientX / window.innerWidth - 0.5) * 20,
         y: (e.clientY / window.innerHeight - 0.5) * 20,
@@ -108,7 +128,7 @@ export default function HeroSection() {
   ]
 
   return (
-    <section className="relative h-screen flex items-center overflow-hidden">
+    <section ref={sectionRef} className="relative h-screen flex items-center overflow-hidden">
       {/* Cinematic Background Grid */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div 
@@ -139,7 +159,7 @@ export default function HeroSection() {
               {navItems.map((item) => (
                 <Button
                   key={item.id}
-                  onClick={() => item.isExternal ? window.location.href = '/gallery' : scrollToSection(item.id)}
+                  onClick={() => item.isExternal ? router.push('/gallery') : scrollToSection(item.id)}
                   size="lg"
                   className="bg-white/10 text-white hover:bg-white/15 backdrop-blur-sm border border-white/10 hover:border-white/20 font-medium tracking-wide px-6 py-3 rounded-full transition-all whitespace-nowrap"
                 >
@@ -206,7 +226,7 @@ export default function HeroSection() {
                 onMouseLeave={handleNameMouseLeave}
                 className="flex items-center select-none relative" 
                 style={{ 
-                  fontFamily: "'Orbitron', 'Rajdhani', 'Space Grotesk', 'SF Pro Display', system-ui, sans-serif",
+                  fontFamily: "var(--font-orbitron), 'Rajdhani', 'Space Grotesk', 'SF Pro Display', system-ui, sans-serif",
                 }}
               >
                 {nameLetters.map((letter, index) => {

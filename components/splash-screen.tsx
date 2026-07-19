@@ -46,6 +46,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     }));
 
     const shootingStars: ShootingStar[] = [];
+    let animationFrameId: number;
 
     const createShootingStar = () => {
       if (shootingStars.length < 2) {
@@ -97,7 +98,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         }
       });
 
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
 
     animate();
@@ -112,6 +113,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     return () => {
       clearInterval(shootingInterval);
       clearTimeout(timer);
+      cancelAnimationFrame(animationFrameId);
     };
   }, [onComplete]);
 

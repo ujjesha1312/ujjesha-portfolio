@@ -3,37 +3,36 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowLeft } from "lucide-react"
 
 interface MediaItem {
   id: number
   type: 'image' | 'video'
   src: string
-  aspectRatio: number
 }
 
-// Sample media items - replace with your actual media
 const mediaItems: MediaItem[] = [
-  { id: 1, type: 'image', src: '/gallery/img1.jpg', aspectRatio: 1.0 },
-  { id: 2, type: 'video', src: '/gallery/vid1.mp4', aspectRatio: 1.0 },
-  { id: 3, type: 'image', src: '/gallery/img2.jpg', aspectRatio: 1.0 },
-  { id: 4, type: 'image', src: '/gallery/img3.jpg', aspectRatio: 1.0 },
-  { id: 5, type: 'video', src: '/gallery/vid2.mp4', aspectRatio: 1.0 },
-  { id: 6, type: 'image', src: '/gallery/img4.jpg', aspectRatio: 1.0 },
-  { id: 7, type: 'image', src: '/gallery/img5.jpg', aspectRatio: 1.0 },
-  { id: 8, type: 'video', src: '/gallery/vid3.mp4', aspectRatio: 1.0 },
-  { id: 9, type: 'image', src: '/gallery/img6.jpg', aspectRatio: 1.0 },
-  { id: 10, type: 'image', src: '/gallery/img7.jpg', aspectRatio: 1.0 },
-  { id: 11, type: 'video', src: '/gallery/vid4.mp4', aspectRatio: 1.0 },
-  { id: 12, type: 'image', src: '/gallery/img8.jpg', aspectRatio: 1.0 },
-  { id: 13, type: 'image', src: '/gallery/img9.jpg', aspectRatio: 1.0 },
-  { id: 14, type: 'video', src: '/gallery/vid5.mp4', aspectRatio: 1.0 },
-  { id: 15, type: 'image', src: '/gallery/img10.jpg', aspectRatio: 1.0 },
-  { id: 16, type: 'image', src: '/gallery/img11.jpg', aspectRatio: 1.0 },
-  { id: 17, type: 'video', src: '/gallery/vid6.mp4', aspectRatio: 1.0 },
-  { id: 18, type: 'image', src: '/gallery/img12.jpg', aspectRatio: 1.0 },
-  { id: 19, type: 'video', src: '/gallery/vid7.mp4', aspectRatio: 1.0 },
-  { id: 20, type: 'image', src: '/gallery/img13.jpg', aspectRatio: 1.0 },
+  { id: 1, type: 'image', src: '/gallery/img1.jpg' },
+  { id: 2, type: 'video', src: '/gallery/vid1.mp4' },
+  { id: 3, type: 'image', src: '/gallery/img2.jpg' },
+  { id: 4, type: 'image', src: '/gallery/img3.jpg' },
+  { id: 5, type: 'video', src: '/gallery/vid2.mp4' },
+  { id: 6, type: 'image', src: '/gallery/img4.jpg' },
+  { id: 7, type: 'image', src: '/gallery/img5.jpg' },
+  { id: 8, type: 'video', src: '/gallery/vid3.mp4' },
+  { id: 9, type: 'image', src: '/gallery/img6.jpg' },
+  { id: 10, type: 'image', src: '/gallery/img7.jpg' },
+  { id: 11, type: 'video', src: '/gallery/vid4.mp4' },
+  { id: 12, type: 'image', src: '/gallery/img8.jpg' },
+  { id: 13, type: 'image', src: '/gallery/img9.jpg' },
+  { id: 14, type: 'video', src: '/gallery/vid5.mp4' },
+  { id: 15, type: 'image', src: '/gallery/img10.jpg' },
+  { id: 16, type: 'image', src: '/gallery/img11.jpg' },
+  { id: 17, type: 'video', src: '/gallery/vid6.mp4' },
+  { id: 18, type: 'image', src: '/gallery/img12.jpg' },
+  { id: 19, type: 'video', src: '/gallery/vid7.mp4' },
+  { id: 20, type: 'image', src: '/gallery/img13.jpg' },
 ]
 
 function MediaCard({ item, index }: { item: MediaItem; index: number }) {
@@ -49,10 +48,12 @@ function MediaCard({ item, index }: { item: MediaItem; index: number }) {
       onMouseLeave={() => setIsHovered(false)}
     >
       {item.type === 'image' ? (
-        <img
+        <Image
           src={item.src}
           alt={`Personal photo ${index + 1} of ${mediaItems.length} from Ujjesha's gallery`}
-          className="w-full h-full object-cover transition-all duration-700 ease-out"
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
+          className="object-cover transition-all duration-700 ease-out"
           style={{
             filter: isHovered ? 'saturate(1.1) brightness(1.05)' : 'saturate(0.8) brightness(0.9)',
             transform: isHovered ? 'scale(1.03)' : 'scale(1)',

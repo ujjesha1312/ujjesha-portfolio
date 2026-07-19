@@ -493,10 +493,10 @@ export default function ExperienceSection() {
           {/* Mobile: vertical mission console */}
           <div className="sm:hidden space-y-3">
             {missions.map((mission) => (
-              <button
+              <div
                 key={mission.id}
                 onClick={() => handleMissionClick(mission)}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-[#05070d] border border-[#6fa8ff]/10 text-left"
+                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-[#05070d] border border-[#6fa8ff]/10 text-left cursor-pointer"
               >
                 <div className="shrink-0 scale-[0.7] -mx-3">
                   <MissionCraft
@@ -518,7 +518,7 @@ export default function ExperienceSection() {
                 <span className="flex items-center gap-1.5 text-[10px] text-emerald-400/80 shrink-0">
                   <span className="w-1 h-1 rounded-full bg-emerald-400" /> {mission.status}
                 </span>
-              </button>
+              </div>
             ))}
 
             {/* Transmission + panel reused on mobile via fixed overlay */}

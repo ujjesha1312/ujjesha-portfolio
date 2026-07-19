@@ -352,10 +352,6 @@ export default function ContactSection() {
         .animate-fade-in {
           animation: fade-in 0.3s ease-out forwards;
         }
-
-        .animate-slide-up {
-          animation: slide-up 0.3s ease-out forwards;
-        }
       `}</style>
     </section>
   )

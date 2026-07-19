@@ -2,12 +2,14 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence, type Variants } from "framer-motion"
-import { shelves } from "@/lib/skills-data"
+import { shelves, type Shelf } from "@/lib/skills-data"
 import { useMediaQuery } from "@/lib/use-media-query"
 import AiCore from "@/components/ai-core"
 
 const CATEGORY_ORDER = ["programming", "ai-ml", "frameworks", "core-cs", "tools"]
-const orderedShelves = CATEGORY_ORDER.map((id) => shelves.find((s) => s.id === id)!).filter(Boolean)
+const orderedShelves = CATEGORY_ORDER
+  .map((id) => shelves.find((s) => s.id === id))
+  .filter((s): s is Shelf => s !== undefined)
 
 export default function SkillsSection() {
   const [activeCategory, setActiveCategory] = useState(orderedShelves[0].id)

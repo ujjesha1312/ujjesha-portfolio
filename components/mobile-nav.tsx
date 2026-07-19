@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useRouter } from "next/navigation"
 import { Menu, X } from "lucide-react"
 import { useMediaQuery } from "@/lib/use-media-query"
 
@@ -16,6 +17,7 @@ const navItems = [
 
 export default function MobileNav() {
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
   const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
   const closeButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -48,7 +50,7 @@ export default function MobileNav() {
 
   const handleGallery = () => {
     setIsOpen(false)
-    window.location.href = "/gallery"
+    router.push("/gallery")
   }
 
   return (

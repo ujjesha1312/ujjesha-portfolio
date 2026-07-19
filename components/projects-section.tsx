@@ -636,7 +636,7 @@ export default function ProjectsSection() {
                       }}
                     />
 
-                    {/* OPTION 1: Hologram Frame */}
+                    {/* Hologram frame — empty state before a project is selected */}
                     <div className="relative z-10 w-80 h-64">
                       {/* Corner Brackets */}
                       {/* Top-left */}

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 export default function GalleryCTASection() {
   const router = useRouter();
@@ -28,10 +29,12 @@ export default function GalleryCTASection() {
               {/* Background Images - Blurred */}
               <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-1">
                 <div className="relative overflow-hidden">
-                  <img
+                  <Image
                     src="/gallery/img1.jpg"
                     alt=""
-                    className="w-full h-full object-cover scale-110 blur-md"
+                    fill
+                    sizes="(max-width: 640px) 50vw, 384px"
+                    className="object-cover scale-110 blur-md"
                   />
                 </div>
                 <div className="relative overflow-hidden">
@@ -46,17 +49,21 @@ export default function GalleryCTASection() {
                   </video>
                 </div>
                 <div className="relative overflow-hidden">
-                  <img
+                  <Image
                     src="/gallery/img5.jpg"
                     alt=""
-                    className="w-full h-full object-cover scale-110 blur-md"
+                    fill
+                    sizes="(max-width: 640px) 50vw, 384px"
+                    className="object-cover scale-110 blur-md"
                   />
                 </div>
                 <div className="relative overflow-hidden">
-                  <img
+                  <Image
                     src="/gallery/img3.jpg"
                     alt=""
-                    className="w-full h-full object-cover scale-110 blur-md"
+                    fill
+                    sizes="(max-width: 640px) 50vw, 384px"
+                    className="object-cover scale-110 blur-md"
                   />
                 </div>
               </div>
